@@ -1,0 +1,2270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>江祈言 · 五子棋人机对弈</title>
+<style>
+
+  :root {
+    --bg-deep: #12051f;
+    --bg-mid: #24103c;
+    --panel-bg: rgba(20, 13, 39, 0.62);
+    --panel-border: rgba(255, 167, 242, 0.18);
+    --panel-highlight: rgba(122, 91, 255, 0.2);
+    --text-main: #f6efff;
+    --text-soft: #c8b8df;
+    --text-dim: #8f84b5;
+    --accent-pink: #ff4fd8;
+    --accent-violet: #8c54ff;
+    --accent-blue: #6fd3ff;
+    --accent-gold: #ffd36f;
+    --board-light: linear-gradient(145deg, #ffe5f8 0%, #ffd2f6 100%);
+    --board-dark: linear-gradient(145deg, #5a3395 0%, #28164f 100%);
+    --bubble-bg: rgba(33, 18, 59, 0.94);
+    --bubble-border: #ff58cf;
+    --bubble-color: #ffd8fb;
+    --bubble-font: "Comic Sans MS", "Chalkboard SE", "PingFang SC", cursive;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow-x: hidden;
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: var(--text-main);
+    background:
+      radial-gradient(circle at 18% 18%, rgba(255, 94, 210, 0.23), transparent 24%),
+      radial-gradient(circle at 82% 16%, rgba(108, 78, 255, 0.18), transparent 28%),
+      radial-gradient(circle at 78% 84%, rgba(255, 94, 210, 0.16), transparent 22%),
+      radial-gradient(circle at 20% 82%, rgba(91, 215, 255, 0.12), transparent 22%),
+      linear-gradient(135deg, #12031b 0%, #1a0730 40%, #12051f 100%);
+  }
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+  }
+  body::before {
+    opacity: 0.16;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'><g fill='%23ff5bd8'><path d='M20 28h8v-8h8v8h8v8h-8v8h-8v-8h-8z'/><path d='M138 102h10v-10h10v10h10v10h-10v10h-10v-10h-10z'/><path d='M74 140h8v-8h8v8h8v8h-8v8h-8v-8h-8z'/></g><g fill='%23714cff'><rect x='118' y='26' width='6' height='6'/><rect x='128' y='26' width='6' height='6'/><rect x='123' y='31' width='6' height='6'/><rect x='32' y='110' width='6' height='6'/><rect x='42' y='110' width='6' height='6'/><rect x='37' y='115' width='6' height='6'/><rect x='88' y='62' width='4' height='4'/><rect x='96' y='62' width='4' height='4'/><rect x='92' y='66' width='4' height='4'/></g></svg>");
+    background-size: 180px 180px;
+    animation: bg-drift 22s linear infinite;
+    mix-blend-mode: screen;
+  }
+  body::after {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.07), transparent 16%),
+      radial-gradient(circle at center, transparent 62%, rgba(0, 0, 0, 0.18) 100%);
+  }
+  @keyframes bg-drift {
+    0% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(-28px, 18px, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
+
+  .app {
+    display: flex;
+    gap: 26px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    isolation: isolate;
+  }
+
+  .float-hearts-layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .pixel-heart {
+    position: absolute;
+    width: 26px;
+    aspect-ratio: 1;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g fill='%23ff58cf'><rect x='8' y='4' width='4' height='4'/><rect x='12' y='4' width='4' height='4'/><rect x='20' y='4' width='4' height='4'/><rect x='24' y='4' width='4' height='4'/><rect x='4' y='8' width='8' height='4'/><rect x='12' y='8' width='8' height='4'/><rect x='20' y='8' width='8' height='4'/><rect x='0' y='12' width='28' height='4'/><rect x='4' y='16' width='20' height='4'/><rect x='8' y='20' width='12' height='4'/><rect x='12' y='24' width='4' height='4'/></g></svg>");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    opacity: .45;
+    filter: drop-shadow(0 0 10px rgba(255, 90, 213, .35));
+    animation: float-heart linear infinite;
+  }
+  @keyframes float-heart {
+    0% { transform: translate3d(0, 0, 0) scale(var(--s,1)); opacity: 0; }
+    12% { opacity: .48; }
+    85% { opacity: .4; }
+    100% { transform: translate3d(var(--dx, 0px), calc(-1 * var(--travel, 520px)), 0) scale(var(--s,1)); opacity: 0; }
+  }
+
+  .board-container,
+  .panel { position: relative; }
+  .board-container {
+    width: min(88vw, 580px);
+    z-index: 4;
+    filter: drop-shadow(0 26px 48px rgba(0,0,0,.34));
+  }
+  .board-container[data-ai-pos="below"] { margin-bottom: 320px; }
+  .board-container[data-ai-pos="above"] { margin-top: 320px; }
+  .board-container[data-ai-pos="topleft"] { margin-left: 300px; }
+
+  .board {
+    width: 100%;
+    aspect-ratio: 1;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    border: 1px solid rgba(255,255,255,.18);
+    background: linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+    box-shadow:
+      0 20px 60px rgba(10, 4, 20, .7),
+      0 0 0 1px rgba(255, 107, 226, .18),
+      inset 0 0 0 4px rgba(255,255,255,.05),
+      inset 0 0 35px rgba(125, 83, 255, .12);
+    backdrop-filter: blur(6px);
+  }
+  .board::before,
+  .board::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .board::before {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.13), transparent 22%, transparent 78%, rgba(255,255,255,.04)),
+      radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.12), transparent 26%),
+      radial-gradient(circle at 85% 85%, rgba(255, 90, 213, 0.08), transparent 20%);
+    z-index: 2;
+    mix-blend-mode: screen;
+  }
+  .board::after {
+    inset: 10px;
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,.06);
+    z-index: 2;
+  }
+
+  .sq {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    transition: transform .18s ease, filter .18s ease, box-shadow .18s ease, background .18s ease;
+  }
+  .sq:hover { filter: brightness(1.06); }
+  .light { background: var(--board-light); }
+  .dark  { background: var(--board-dark); }
+  .sq.move::after,
+  .sq.capture::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+  }
+  .sq.move::after {
+    width: 28%;
+    height: 28%;
+    background: radial-gradient(circle, rgba(255,255,255,.96) 0%, rgba(99, 200, 255, .88) 32%, rgba(255, 79, 216, .84) 100%);
+    box-shadow: 0 0 18px rgba(99, 200, 255, .55), 0 0 10px rgba(255, 79, 216, .45);
+  }
+  .sq.capture::after {
+    width: 82%;
+    height: 82%;
+    background: transparent;
+    border: 4px solid rgba(255, 83, 188, .88);
+    box-shadow: 0 0 18px rgba(255, 83, 188, .28), inset 0 0 10px rgba(255,255,255,.14);
+  }
+  .sq.selected {
+    box-shadow: inset 0 0 0 4px rgba(255, 211, 111, .96), inset 0 0 30px rgba(255,255,255,.12);
+  }
+  .sq.lastmove {
+    box-shadow: inset 0 0 0 4px rgba(115, 221, 255, .72), inset 0 0 22px rgba(115, 221, 255, .22);
+  }
+
+  .piece {
+    font-size: clamp(24px, 6.3vmin, 50px);
+    line-height: 1;
+    z-index: 1;
+    pointer-events: none;
+    transform-origin: center;
+    filter: drop-shadow(0 3px 8px rgba(0,0,0,.35));
+  }
+  .piece.w {
+    color: #fff9ff;
+    -webkit-text-stroke: 1.3px rgba(62, 17, 69, 0.76);
+    text-shadow: 0 0 10px rgba(255,255,255,.22), 0 0 12px rgba(255, 115, 226, .18);
+  }
+  .piece.b {
+    color: #25113e;
+    -webkit-text-stroke: 1.2px rgba(255, 185, 244, 0.26);
+    text-shadow: 0 0 10px rgba(255, 79, 216, .22);
+  }
+
+  .badge {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    font-size: clamp(8px, 1.5vmin, 11px);
+    font-weight: 700;
+    line-height: 1;
+    padding: 4px 6px;
+    border-radius: 999px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.24);
+    backdrop-filter: blur(4px);
+  }
+  .badge.val {
+    top: 4px; left: 4px;
+    background: rgba(66, 255, 205, .18);
+    border: 1px solid rgba(66, 255, 205, .3);
+    color: #d5fff4;
+  }
+  .badge.thr {
+    bottom: 4px; right: 4px;
+    background: rgba(255, 94, 164, .18);
+    border: 1px solid rgba(255, 94, 164, .26);
+    color: #fff2f7;
+  }
+
+  @keyframes king-shake {
+    0%,100% { transform: translate(0,0) rotate(0); }
+    10% { transform: translate(-2px, 1px) rotate(-3deg); }
+    20% { transform: translate(2px, -1px) rotate(3deg); }
+    30% { transform: translate(-1px, -2px) rotate(-2deg); }
+    40% { transform: translate(1px, 2px) rotate(2deg); }
+    50% { transform: translate(-2px, -1px) rotate(-3deg); }
+    60% { transform: translate(2px, 1px) rotate(3deg); }
+    70% { transform: translate(-1px, 2px) rotate(-2deg); }
+    80% { transform: translate(1px, -2px) rotate(2deg); }
+    90% { transform: translate(-2px, 1px) rotate(-2deg); }
+  }
+  @keyframes king-crack {
+    0%,100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+    50% { filter: brightness(1.28) drop-shadow(0 0 14px rgba(255, 91, 216, .92)); }
+  }
+  .king-in-check .piece {
+    animation: king-shake .35s ease-in-out infinite, king-crack .9s ease-in-out infinite;
+  }
+  .sq.exploded .piece { animation: king-explode .9s ease-out forwards; }
+  @keyframes king-explode {
+    0% { transform: scale(1); opacity: 1; }
+    40% { transform: scale(1.6); opacity: .78; filter: drop-shadow(0 0 25px #ff6be2); }
+    100% { transform: scale(0); opacity: 0; }
+  }
+  .particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    animation: particle-explode 1.4s ease-out forwards;
+    z-index: 10;
+    box-shadow: 0 0 12px rgba(255,255,255,.35);
+  }
+  @keyframes particle-explode {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0); opacity: 0; }
+  }
+  @keyframes board-quake {
+    0%,100% { transform: translate(0,0); }
+    10% { transform: translate(-4px, 2px); }
+    20% { transform: translate(4px, -2px); }
+    30% { transform: translate(-3px, 3px); }
+    40% { transform: translate(3px, -3px); }
+    50% { transform: translate(-4px, -2px); }
+    60% { transform: translate(4px, 2px); }
+    70% { transform: translate(-2px, -3px); }
+    80% { transform: translate(2px, 3px); }
+    90% { transform: translate(-1px, 1px); }
+  }
+  .board.quake { animation: board-quake .7s ease-in-out; }
+
+  .fire-layer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: 4;
+    opacity: 0;
+    transition: opacity .45s;
+  }
+  .fire-layer.active { opacity: 1; }
+  .fire-layer.bottom { bottom: 0; height: 45%; }
+  .fire-layer.top    { top: 0; height: 45%; }
+  .fire-layer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    filter: blur(14px);
+    animation: fire-flicker .9s ease-in-out infinite;
+  }
+  .fire-layer.bottom::before {
+    background: radial-gradient(ellipse at bottom, rgba(255, 84, 207, .82) 0%, rgba(129, 77, 255, .6) 38%, transparent 78%);
+  }
+  .fire-layer.top::before {
+    background: radial-gradient(ellipse at top, rgba(99, 200, 255, .72) 0%, rgba(255, 84, 207, .55) 38%, transparent 78%);
+  }
+  @keyframes fire-flicker {
+    0%,100% { transform: scaleY(1) scaleX(1); opacity: .7; }
+    25% { transform: scaleY(1.1) scaleX(.95); opacity: .9; }
+    50% { transform: scaleY(.95) scaleX(1.05); opacity: .8; }
+    75% { transform: scaleY(1.08) scaleX(.98); opacity: .85; }
+  }
+
+  .ai-stage {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    width: 280px;
+    max-width: 280px;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .board-container[data-ai-pos="below"] .ai-stage {
+    top: 100%; left: 50%; transform: translateX(-50%); margin-top: 16px;
+    flex-direction: column-reverse;
+  }
+  .board-container[data-ai-pos="above"] .ai-stage {
+    bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 16px;
+  }
+  .board-container[data-ai-pos="topleft"] .ai-stage {
+    right: calc(100% + 18px);
+    top: 0;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    align-items: stretch;
+  }
+
+  .ai-bubble {
+    background:
+      linear-gradient(180deg, rgba(57, 31, 99, 0.96), rgba(22, 12, 42, 0.98)),
+      rgba(18, 10, 36, 0.92);
+    color: var(--bubble-color);
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow:
+      0 14px 28px rgba(0,0,0,.42),
+      0 0 0 1px rgba(255, 88, 207, .28),
+      inset 0 0 18px rgba(255,255,255,.05);
+    border-radius: 18px;
+    padding: 12px 15px;
+    font-family: var(--bubble-font);
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.65;
+    text-align: center;
+    max-width: 280px;
+    min-height: 60px;
+    word-break: break-word;
+    position: relative;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .25s, visibility .25s, transform .25s;
+    transform: translateY(6px);
+    pointer-events: none;
+  }
+  .ai-bubble.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .ai-bubble::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: 17px;
+    background: linear-gradient(180deg, rgba(255,255,255,.08), transparent 35%);
+    pointer-events: none;
+  }
+  .ai-bubble::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    transform: translateX(-50%) rotate(45deg);
+    background: #23123f;
+    border: 1px solid rgba(255, 88, 207, .3);
+  }
+  .board-container[data-ai-pos="above"] .ai-bubble::after,
+  .board-container[data-ai-pos="topleft"] .ai-bubble::after {
+    bottom: -8px;
+    border-left: none;
+    border-top: none;
+  }
+  .board-container[data-ai-pos="below"] .ai-bubble::after {
+    top: -8px;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .ai-avatar-shell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .ai-avatar {
+    width: 240px;
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 28px;
+    border: 1px solid rgba(255,255,255,.16);
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,.16), transparent 28%),
+      linear-gradient(145deg, rgba(255, 90, 213, .32), rgba(113, 76, 255, .18) 42%, rgba(23, 12, 47, .96));
+    box-shadow:
+      0 18px 34px rgba(0,0,0,.45),
+      0 0 0 1px rgba(255, 88, 207, .18),
+      inset 0 0 24px rgba(255,255,255,.08),
+      inset 0 0 28px rgba(124, 83, 255, .18);
+    position: relative;
+  }
+  .ai-avatar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(180deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 12px 12px;
+    opacity: .25;
+    pointer-events: none;
+  }
+  .ai-avatar img {
+    width: 100%; height: 100%; object-fit: fill; display: block;
+  }
+  .ai-nameplate {
+    width: 100%;
+    text-align: center;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    border-radius: 999px;
+    color: #ffe8fb;
+    background: rgba(32, 18, 58, .9);
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 8px 16px rgba(0,0,0,.24);
+  }
+
+  .mascot {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    animation: mascot-float 3.2s ease-in-out infinite;
+    overflow: hidden;
+  }
+  @keyframes mascot-float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .mascot .fx-symbol {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    z-index: 7;
+    font-size: 24px;
+    font-weight: 900;
+    color: #ff78e4;
+    text-shadow: 0 0 10px rgba(255,255,255,.18), 0 0 14px rgba(255,120,228,.45);
+    animation: fx-pop 1.6s ease-in-out infinite;
+  }
+  @keyframes fx-pop {
+    0%,100% { transform: translateY(0) scale(1); opacity: .88; }
+    50% { transform: translateY(-6px) scale(1.08); opacity: 1; }
+  }
+  .mascot .heart-spark {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .mascot .heart-spark::before,
+  .mascot .heart-spark::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><g fill='%23ff63d7'><rect x='6' y='2' width='3' height='3'/><rect x='9' y='2' width='3' height='3'/><rect x='15' y='2' width='3' height='3'/><rect x='18' y='2' width='3' height='3'/><rect x='3' y='5' width='6' height='3'/><rect x='9' y='5' width='6' height='3'/><rect x='15' y='5' width='6' height='3'/><rect x='0' y='8' width='21' height='3'/><rect x='3' y='11' width='15' height='3'/><rect x='6' y='14' width='9' height='3'/><rect x='9' y='17' width='3' height='3'/></g></svg>");
+    background-size: 100% 100%;
+    opacity: .42;
+    animation: heart-bob 4.2s ease-in-out infinite;
+  }
+  .mascot .heart-spark::before { left: 16px; bottom: 40px; }
+  .mascot .heart-spark::after { right: 18px; bottom: 58px; animation-delay: -2s; }
+  @keyframes heart-bob {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .mascot .tail,
+  .mascot .ear,
+  .mascot .head,
+  .mascot .hoodie,
+  .mascot .hand { position: absolute; }
+  .mascot .tail {
+    width: 78px;
+    height: 142px;
+    top: 46px;
+    border-radius: 46px;
+    background: linear-gradient(180deg, #171126 0%, #24103f 34%, #3d1e73 72%, #4d7cff 100%);
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.04);
+    z-index: 1;
+  }
+  .mascot .tail.left { left: 10px; transform: rotate(6deg); }
+  .mascot .tail.right { right: 10px; transform: rotate(-6deg); }
+  .mascot .ear {
+    width: 46px; height: 58px; top: 14px;
+    background: linear-gradient(180deg, #e3d3ff, #b68fff);
+    clip-path: polygon(50% 0, 0 100%, 100% 100%);
+    z-index: 3;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,.15));
+  }
+  .mascot .ear::after {
+    content: ""; position: absolute; inset: 14px 10px 6px;
+    background: rgba(171, 140, 255, .45);
+    clip-path: polygon(50% 0, 0 100%, 100% 100%);
+  }
+  .mascot .ear.left { left: 56px; transform: rotate(-10deg); }
+  .mascot .ear.right { right: 56px; transform: rotate(10deg); }
+  .mascot .head {
+    width: 160px;
+    height: 164px;
+    left: 40px;
+    top: 34px;
+    z-index: 4;
+  }
+  .mascot .head::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 46% 46% 40% 40% / 42% 42% 48% 48%;
+    background: linear-gradient(180deg, #191126 0%, #261638 42%, #1f1530 100%);
+    box-shadow: inset 0 -6px 0 rgba(255,255,255,.04);
+  }
+  .mascot .bangs {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 2px;
+    height: 80px;
+    border-radius: 42px 42px 24px 24px;
+    background: linear-gradient(180deg, #151021 0%, #231331 100%);
+    z-index: 2;
+  }
+  .mascot .bangs::after {
+    content: "";
+    position: absolute;
+    left: 34px;
+    top: 44px;
+    width: 92px;
+    height: 44px;
+    background: linear-gradient(180deg, #151021, #231331);
+    clip-path: polygon(0 0, 28% 24%, 40% 100%, 55% 30%, 72% 100%, 100% 12%, 100% 100%, 0 100%);
+  }
+  .mascot .face {
+    position: absolute;
+    left: 26px;
+    top: 58px;
+    width: 108px;
+    height: 96px;
+    border-radius: 44% 44% 48% 48%;
+    background: #fff1fb;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .mascot .eye {
+    position: absolute;
+    top: 22px;
+    width: 32px;
+    height: 28px;
+    border-radius: 50% 50% 46% 46%;
+    background: rgba(70, 38, 116, .1);
+    overflow: hidden;
+    transform-origin: center;
+  }
+  .mascot .eye.left { left: 16px; }
+  .mascot .eye.right { right: 16px; }
+  .mascot .eye .iris {
+    position: absolute;
+    left: 3px;
+    top: 1px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #ff294e;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,.08);
+    animation: blink-eye 5s ease-in-out infinite;
+  }
+  .mascot .eye .iris::before,
+  .mascot .eye .iris::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 14px;
+    height: 4px;
+    background: #ffe766;
+    transform: translate(-50%, -50%);
+    border-radius: 999px;
+  }
+  .mascot .eye .iris::after { transform: translate(-50%, -50%) rotate(90deg); }
+  @keyframes blink-eye {
+    0%, 45%, 48%, 100% { transform: scaleY(1); }
+    46%, 47% { transform: scaleY(.08); }
+  }
+  .mascot .brow {
+    position: absolute;
+    top: 14px;
+    width: 28px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(44, 18, 68, .55);
+  }
+  .mascot .brow.left { left: 16px; transform: rotate(-6deg); }
+  .mascot .brow.right { right: 16px; transform: rotate(6deg); }
+  .mascot .blush {
+    position: absolute;
+    width: 20px; height: 12px; bottom: 20px;
+    border-radius: 50%; background: rgba(255, 143, 193, .45);
+  }
+  .mascot .blush.left { left: 12px; }
+  .mascot .blush.right { right: 12px; }
+  .mascot .mouth {
+    position: absolute;
+    left: 50%;
+    bottom: 20px;
+    width: 22px;
+    height: 16px;
+    transform: translateX(-50%);
+    border-radius: 0 0 12px 12px;
+    border: 3px solid #c55dae;
+    border-top: 0;
+  }
+  .mascot .mouth::before {
+    content: "";
+    position: absolute;
+    left: 50%; top: -2px;
+    width: 12px; height: 10px;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: rgba(255,255,255,.3);
+  }
+  .mascot .bow {
+    position: absolute;
+    right: 12px;
+    width: 28px;
+    height: 16px;
+    background: #ff75de;
+    border-radius: 999px;
+    z-index: 6;
+    box-shadow: 0 0 10px rgba(255, 117, 222, .18);
+  }
+  .mascot .bow::before,
+  .mascot .bow::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    background: #ff9ee8;
+    border-radius: 4px 10px 10px 10px;
+    transform: translateY(-50%) rotate(45deg);
+  }
+  .mascot .bow::before { left: -2px; }
+  .mascot .bow::after { right: -2px; }
+  .mascot .bow.top { top: 44px; }
+  .mascot .bow.bottom { top: 70px; }
+  .mascot .hoodie {
+    width: 140px;
+    height: 96px;
+    left: 50px;
+    bottom: 12px;
+    border-radius: 24px 24px 22px 22px;
+    background: linear-gradient(180deg, #1b132a 0%, #2a1742 100%);
+    z-index: 3;
+  }
+  .mascot .hoodie::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 10px;
+    width: 86px;
+    height: 42px;
+    transform: translateX(-50%);
+    border-radius: 0 0 18px 18px;
+    background: rgba(10, 5, 18, .35);
+  }
+  .mascot .skull {
+    position: absolute;
+    left: 50%;
+    bottom: 12px;
+    width: 56px;
+    height: 46px;
+    transform: translateX(-50%);
+    border-radius: 28px 28px 20px 20px;
+    background: #ffd36f;
+  }
+  .mascot .skull::before,
+  .mascot .skull::after {
+    content: ""; position: absolute; top: 14px;
+    width: 12px; height: 14px; border-radius: 50%; background: #48295d;
+  }
+  .mascot .skull::before { left: 11px; }
+  .mascot .skull::after { right: 11px; }
+  .mascot .skull i {
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    width: 14px;
+    height: 9px;
+    transform: translateX(-50%);
+    clip-path: polygon(50% 0, 0 100%, 100% 100%);
+    background: #48295d;
+    display: block;
+  }
+  .mascot .hand {
+    width: 42px;
+    height: 54px;
+    left: 66px;
+    bottom: 46px;
+    border-radius: 24px;
+    background: #ffe8f6;
+    z-index: 5;
+    transform: rotate(22deg);
+    box-shadow: 0 4px 12px rgba(0,0,0,.18);
+  }
+  .mascot .hand::before {
+    content: "";
+    position: absolute;
+    inset: 10px 6px auto 8px;
+    height: 20px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.25);
+  }
+
+  .mascot.mood-thinking .eye .iris { transform: translateY(-1px); }
+  .mascot.mood-thinking .brow.left { transform: rotate(-18deg); }
+  .mascot.mood-thinking .brow.right { transform: rotate(18deg); }
+  .mascot.mood-sleeping .eye { height: 4px; top: 33px; background: #5f4c88; }
+  .mascot.mood-sleeping .eye .iris { display: none; }
+  .mascot.mood-sleeping .mouth { width: 18px; height: 10px; border-width: 2px; }
+  .mascot.mood-start .mouth,
+  .mascot.mood-win .mouth,
+  .mascot.mood-promotion .mouth { width: 28px; height: 18px; border-color: #ff66c6; }
+  .mascot.mood-lose .eye .iris,
+  .mascot.mood-incheck .eye .iris,
+  .mascot.mood-lostqueen .eye .iris,
+  .mascot.mood-lostpiece .eye .iris { background: #ff5672; }
+  .mascot.mood-lose .mouth,
+  .mascot.mood-lostqueen .mouth,
+  .mascot.mood-lostpiece .mouth {
+    width: 22px;
+    height: 12px;
+    border-radius: 14px 14px 0 0;
+    border: 3px solid #c55dae;
+    border-bottom: 0;
+    top: 64px;
+    bottom: auto;
+  }
+  .mascot.mood-capturequeen .mouth,
+  .mascot.mood-taunt .mouth { width: 30px; transform: translateX(-50%) rotate(-8deg); }
+  .mascot.mood-check .brow.left { transform: rotate(-22deg); }
+  .mascot.mood-check .brow.right { transform: rotate(22deg); }
+  .mascot.mood-draw .mouth { width: 20px; height: 0; border: 0; border-top: 3px solid #c55dae; bottom: 26px; }
+  .mascot.mood-aftermove .brow.right { transform: rotate(18deg) translateY(-2px); }
+  .mascot.mood-capturepiece .mouth::after {
+    content: "";
+    position: absolute;
+    right: -5px;
+    bottom: 1px;
+    width: 9px; height: 12px;
+    border-radius: 0 0 8px 8px;
+    background: #ff82c4;
+    transform: rotate(12deg);
+  }
+  .mascot.mood-lose .face::after {
+    content: "";
+    position: absolute;
+    right: 18px;
+    top: 30px;
+    width: 10px; height: 16px;
+    border-radius: 50% 50% 60% 60%;
+    background: rgba(113, 202, 255, .72);
+    transform: rotate(12deg);
+  }
+
+  .panel {
+    width: min(94vw, 390px);
+    background: linear-gradient(180deg, rgba(26, 15, 48, 0.56), rgba(18, 11, 35, 0.56));
+    border: 1px solid var(--panel-border);
+    border-radius: 28px;
+    padding: 20px;
+    box-shadow:
+      0 18px 42px rgba(0,0,0,.24),
+      0 0 0 1px rgba(255,255,255,.04),
+      inset 0 0 0 1px rgba(255,255,255,.025),
+      inset 0 0 28px rgba(124, 83, 255, .06);
+    backdrop-filter: blur(16px);
+    max-height: 92vh;
+    overflow-y: auto;
+    z-index: 1;
+  }
+  .panel h1 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.1;
+    font-weight: 900;
+    letter-spacing: .06em;
+    background: linear-gradient(90deg, #fff6ff, #ffc6f5 36%, #8bd8ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .panel .sub {
+    margin-top: 6px;
+    margin-bottom: 12px;
+    font-size: 8.4px;
+    line-height: 1.2;
+    letter-spacing: .42em;
+    color: #c6b5e6;
+    opacity: .8;
+    text-transform: uppercase;
+  }
+  .legend { display: none; }
+
+  .ai-info,
+  .material-bar,
+  .status,
+  .log-panel,
+  #info {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+  }
+  .ai-info {
+    font-size: 12px;
+    padding: 9px 12px;
+    border-radius: 16px;
+    color: #f0d8ff;
+    margin-bottom: 12px;
+    word-break: break-all;
+    text-align: center;
+  }
+  .ai-info b { color: var(--accent-gold); }
+  .material-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  .material-bar .label {
+    color: var(--text-soft);
+    font-size: 12px;
+    min-width: 48px;
+  }
+  .material-bar .bar-wrap {
+    flex: 1;
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(0,0,0,.32);
+    overflow: hidden;
+    position: relative;
+  }
+  .material-bar .bar-fill {
+    position: absolute;
+    top: 0; bottom: 0; transition: all .3s ease;
+  }
+  .material-bar .bar-fill.white { background: linear-gradient(90deg, #fff5ff, #ffd2f1); left: 0; }
+  .material-bar .bar-fill.black { background: linear-gradient(90deg, #5a379a, #21123f); right: 0; }
+  .material-bar .diff-tag {
+    font-weight: 800;
+    min-width: 54px;
+    text-align: right;
+    font-size: 12px;
+  }
+  .diff-tag.winning { color: #95ffd9; }
+  .diff-tag.losing { color: #ffaccc; }
+  .diff-tag.even { color: #ffe29d; }
+
+  .status {
+    text-align: center;
+    font-size: 14px;
+    padding: 12px 14px;
+    border-radius: 18px;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .log-panel {
+    height: 122px;
+    overflow-y: auto;
+    border-radius: 18px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.7;
+    font-family: "Consolas", "Menlo", monospace;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .log-line { color: #e8deff; }
+  .log-line .ply { color: #998fbc; display: inline-block; min-width: 34px; }
+  .log-line .cap { color: #ff9ac8; font-weight: 700; }
+  .log-line .w-piece { color: #fff2fb; }
+  .log-line .b-piece { color: #ffd780; }
+  .log-line .ai-meta { color: #9087b6; font-size: 10.5px; margin-left: 6px; }
+
+  #info {
+    border-radius: 18px;
+    padding: 12px;
+    min-height: 96px;
+    font-size: 12.5px;
+    margin-bottom: 10px;
+  }
+  #info:empty { display: none; }
+  .hint { color: var(--text-soft); line-height: 1.6; margin: 0; font-size: 12px; }
+  .info-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #fff3fb;
+  }
+  .info-title .mini { font-size: 20px; line-height: 1; }
+  .info-title .mini.w { color:#fff; -webkit-text-stroke: 1px #462554; }
+  .info-title .mini.b { color:#2b1548; -webkit-text-stroke: 1px #ffd4f3; }
+  .coord { margin-left: auto; font-size: 11px; color: var(--text-dim); font-weight: 500; }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(255,255,255,.08);
+  }
+  .row b { color: var(--accent-gold); }
+  .row.total {
+    border-bottom: none;
+    margin-top: 4px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255,255,255,.14);
+    font-size: 13px;
+  }
+  .row.total b { color: #ff9bcf; font-size: 15px; }
+
+  .btn-row,
+  .sample-row,
+  .choice,
+  .mini-btns,
+  .promo-choices { display: flex; gap: 10px; }
+  .btn-row { margin-top: 10px; }
+  .btn-row button { flex: 1; }
+
+  button {
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 16px;
+    cursor: pointer;
+    background: linear-gradient(135deg, rgba(255, 86, 205, .9), rgba(117, 83, 255, .92));
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    box-shadow: 0 10px 22px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.12);
+    transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+  }
+  button:hover:not(:disabled) {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(0,0,0,.28), 0 0 18px rgba(255, 90, 213, .22);
+  }
+  button:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+  button.ghost {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.12);
+    color: #f1dcff;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  select.builtin-select,
+  .adv-row select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.32);
+    color: var(--text-main);
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+
+  .overlay,
+  .promo-dialog {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(8, 4, 18, 0.82);
+    backdrop-filter: blur(12px);
+  }
+  .overlay { z-index: 100; overflow-y: auto; }
+  .overlay.hidden { display: none; }
+  .promo-dialog { z-index: 200; display: none; }
+  .promo-dialog.show { display: flex; }
+
+  .dialog,
+  .promo-box {
+    width: 100%;
+    background: linear-gradient(180deg, rgba(33, 20, 59, 0.96), rgba(18, 10, 35, 0.95));
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 28px;
+    box-shadow:
+      0 30px 70px rgba(0,0,0,.45),
+      0 0 0 1px rgba(255, 88, 207, .18),
+      inset 0 0 24px rgba(255,255,255,.04);
+    position: relative;
+    overflow: hidden;
+  }
+  .dialog::before,
+  .promo-box::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at top left, rgba(255,255,255,.08), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(124, 83, 255, .16), transparent 25%);
+  }
+  .dialog {
+    max-width: 520px;
+    padding: 24px;
+    text-align: center;
+    margin: auto;
+  }
+  .dialog h2 { margin: 0 0 8px; font-size: 22px; font-weight: 800; }
+  .dialog > p {
+    margin: 0 0 16px;
+    color: var(--text-soft);
+    font-size: 12.5px;
+    line-height: 1.7;
+  }
+  .dialog code {
+    background: rgba(255,255,255,.08);
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 11.5px;
+  }
+  .sec-title {
+    text-align: left;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #f2d3ff;
+    letter-spacing: .12em;
+    margin: 16px 0 8px;
+    text-transform: uppercase;
+  }
+  .choice button {
+    flex: 1;
+    padding: 13px 10px;
+    font-size: 14px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.12);
+    color: #e8deff;
+    font-weight: 700;
+  }
+  .choice button.active {
+    border-color: rgba(255, 211, 111, .72);
+    background: linear-gradient(135deg, rgba(255, 211, 111, .16), rgba(255, 94, 210, .12));
+    color: #ffe9ad;
+    box-shadow: 0 0 18px rgba(255, 211, 111, .12);
+  }
+  .drop {
+    border: 1px dashed rgba(151, 197, 255, .5);
+    border-radius: 18px;
+    padding: 18px 12px;
+    font-size: 13px;
+    color: #d8dcff;
+    cursor: pointer;
+    transition: all .15s;
+    background:
+      linear-gradient(145deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
+      radial-gradient(circle at top right, rgba(255, 94, 210, .12), transparent 35%);
+  }
+  .drop:hover,
+  .drop.dragover {
+    border-color: #6ccfff;
+    background: linear-gradient(145deg, rgba(97, 205, 255, .12), rgba(255, 91, 211, .08));
+    color: #f0f5ff;
+    box-shadow: 0 0 18px rgba(108, 207, 255, .16);
+  }
+  .drop u { color: var(--accent-gold); text-underline-offset: 2px; }
+  .ai-status {
+    font-size: 12px;
+    margin: 10px 0 8px;
+    padding: 9px 11px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    color: var(--text-soft);
+    word-break: break-all;
+  }
+  .ai-status.ok {
+    color: #cffff0;
+    border-color: rgba(120,255,208,.24);
+    background: rgba(84, 255, 213, .08);
+  }
+  .ai-status.err {
+    color: #ffd9e5;
+    border-color: rgba(255,128,164,.24);
+    background: rgba(255,116,161,.08);
+  }
+  .mini-btns button { flex: 1; }
+  #startBtn { margin-top: 14px; width: 100%; padding: 12px; font-size: 14px; }
+
+  .adv-settings {
+    margin-top: 14px;
+    text-align: left;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 0;
+    background: rgba(255,255,255,.03);
+    overflow: hidden;
+  }
+  .adv-settings > summary {
+    padding: 11px 14px;
+    cursor: pointer;
+    font-size: 12.5px;
+    color: #f0e3ff;
+    font-weight: 700;
+    list-style: none;
+    user-select: none;
+  }
+  .adv-settings > summary::-webkit-details-marker { display: none; }
+  .adv-settings > summary::before { content: "▸ "; color: #85d9ff; }
+  .adv-settings[open] > summary::before { content: "▾ "; }
+  .adv-body { padding: 4px 14px 14px; }
+  .adv-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #e7dcff;
+    padding: 6px 0;
+    gap: 8px;
+  }
+  .adv-row label { flex: 1; }
+  .adv-row input[type="color"] {
+    width: 42px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .adv-row input[type="checkbox"] {
+    width: 16px; height: 16px; accent-color: #ff55d4; cursor: pointer;
+  }
+
+  .promo-box { max-width: 420px; padding: 24px; text-align: center; }
+  .promo-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+  .promo-hint { font-size: 12px; color: var(--text-soft); margin-bottom: 14px; }
+  .promo-choices { justify-content: center; }
+  .promo-choices button {
+    flex: 1;
+    padding: 15px 10px;
+    font-size: 15px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 18px;
+    color: #f1e4ff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .promo-choices button .glyph { font-size: 30px; line-height: 1; }
+  .promo-choices button .label { font-size: 12px; font-weight: 700; }
+  .promo-choices button:hover:not(:disabled) {
+    border-color: #ff57cf;
+    background: rgba(255, 87, 207, .12);
+    color: #fff4fd;
+  }
+  .promo-choices button[data-piece="q"] { border-color: rgba(255, 211, 111, .4); }
+
+  @media (max-width: 1100px) {
+    .board-container[data-ai-pos="topleft"] { margin-left: 0; margin-top: 316px; }
+    .board-container[data-ai-pos="topleft"] .ai-stage {
+      left: 50%; right: auto; top: auto; bottom: 100%; transform: translateX(-50%); margin-bottom: 16px;
+      align-items: center;
+    }
+  }
+  @media (max-width: 860px) {
+    body { padding: 14px; }
+    .board-container { width: min(94vw, 520px); }
+    .board-container[data-ai-pos="below"] { margin-bottom: 292px; }
+    .board-container[data-ai-pos="above"],
+    .board-container[data-ai-pos="topleft"] { margin-top: 292px; }
+    .panel { width: min(94vw, 560px); }
+    .ai-stage { width: 250px; max-width: 250px; }
+    .ai-bubble { max-width: 250px; }
+    .ai-avatar { width: 220px; height: 220px; }
+  }
+
+  /* ==================== 五子棋棋盘（15 x 15 · 棋盘永不翻转） ==================== */
+  .board-container { width:min(92vw, 610px); }
+  .board {
+    display:block;position:relative;aspect-ratio:1;
+    border-radius:24px;overflow:hidden;
+    background:
+      radial-gradient(circle at 33% 22%, rgba(255,255,255,.32),transparent 50%),
+      linear-gradient(145deg,#ffdef7 0%,#e4bbef 44%,#bc96db 100%);
+    touch-action:manipulation;
+  }
+  .board::before { background:linear-gradient(145deg,rgba(255,255,255,.14),transparent 70%); z-index:0; }
+  .board::after { inset:6px;border-radius:17px;z-index:0; }
+  .grid-art {position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+  .intersection {
+    position:absolute;z-index:2;
+    left:calc(var(--x) * 6.25%);top:calc(var(--y) * 6.25%);
+    width:6.25%;height:6.25%;
+    display:flex;align-items:center;justify-content:center;
+    padding:0;margin:0;border:0;border-radius:50%;
+    background:transparent;box-shadow:none;
+    transform:translate(-50%,-50%);cursor:default;
+    appearance:none;-webkit-tap-highlight-color:transparent;
+  }
+  .intersection:hover:not(:disabled) {filter:none;transform:translate(-50%,-50%);box-shadow:none;}
+  .intersection.can-place {cursor:crosshair;}
+  .intersection.can-place:hover::before,.intersection.can-place:focus-visible::before {
+    content:"";width:60%;height:60%;border-radius:50%;
+    border:2px solid rgba(255,255,255,.9);background:rgba(108,64,133,.26);
+    box-shadow:0 0 14px rgba(255,255,255,.66);
+  }
+  .intersection:focus-visible{outline:2px solid #ffeeb0;outline-offset:2px;}
+  .intersection .stone {
+    display:block;width:88%;height:88%;border-radius:50%;position:relative;
+    transition:filter .15s ease;
+  }
+  .intersection.black-stone .stone {
+    background:radial-gradient(circle at 30% 24%,#655477 0%,#31213e 36%,#110a1d 75%,#090510 100%);
+    border:1px solid #160b2b;
+    box-shadow:inset -3px -4px 8px rgba(0,0,0,.32),inset 2px 2px 5px rgba(231,182,255,.20),0 3px 5px rgba(38,16,52,.52);
+  }
+  .intersection.white-stone .stone {
+    background:radial-gradient(circle at 30% 23%,#fff 0%,#fff6fd 28%,#f7d6f0 65%,#d6a0ce 100%);
+    border:1px solid rgba(98,46,107,.32);
+    box-shadow:inset -3px -4px 8px rgba(105,43,109,.22),inset 2px 2px 5px rgba(255,255,255,.80),0 3px 6px rgba(38,16,52,.3);
+  }
+  .intersection.last-place .stone::after {
+    content:"";position:absolute;inset:33%;background:#ff59ce;border-radius:50%;
+    box-shadow:0 0 4px #fff,0 0 8px #ff53de;
+  }
+  .intersection.win-place .stone{box-shadow:0 0 0 2px #ffe47e,0 0 20px #ff4cda,inset 0 2px 6px rgba(255,255,255,.25);}
+  .intersection.win-place .stone::after{content:"";position:absolute;inset:32%;background:#ffe37d;border-radius:50%;}
+  .intersection.urgent .stone {animation:urgent-pulse .8s ease-in-out 3;}
+  @keyframes urgent-pulse{50%{filter:brightness(1.5) drop-shadow(0 0 8px #ff45bc);}}
+  .board.quake {animation:board-quake .7s ease-in-out;}
+  .fire-layer {border-radius:24px;overflow:hidden;}
+  .fire-layer.active {opacity:.5;}
+  .ai-bubble {background:linear-gradient(180deg, color-mix(in srgb, var(--bubble-bg) 81%,#5d329a), var(--bubble-bg));border-color:var(--bubble-border);color:var(--bubble-color);}
+  .ai-bubble::after {border-color:var(--bubble-border);background:var(--bubble-bg);}
+  .mascot.mood-block .brow.left,.mascot.mood-threat .brow.left{transform:rotate(-20deg);}
+  .mascot.mood-block .brow.right,.mascot.mood-threat .brow.right{transform:rotate(20deg);}
+  .material-bar .bar-fill.black {left:0;right:auto;background:linear-gradient(90deg,#352344,#7156a2);}
+  .material-bar .bar-fill.white {right:0;left:auto;background:linear-gradient(90deg,#fff7ff,#ffcfed);}
+  .bar-fill {height:100%;}
+  .material-bar .label{min-width:55px;}
+  .diff-tag {min-width:110px!important;}
+  .log-panel {height:145px;}
+  .ai-info {word-break:break-word;}
+  .dialog h2 {font-size:25px;}
+  .dialog > p {font-size:13px;}
+  #startBtn {font-size:15px;}
+  @media(max-width:1100px){
+    .board-container[data-ai-pos="topleft"],
+    .board-container[data-ai-pos="above"] {margin-top:390px;}
+    .board-container[data-ai-pos="below"] {margin-bottom:390px;}
+  }
+  @media(max-width:860px){
+    .board-container {width:min(94vw,540px);}
+    .intersection .stone{width:90%;height:90%;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .mascot,.pixel-heart,.board.quake,.intersection.urgent .stone {animation:none!important;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="board-container" id="boardContainer" data-ai-pos="topleft">
+    <div class="board" id="board" aria-label="十五路五子棋棋盘"></div>
+    <div class="fire-layer" id="fireLayer"></div>
+    <div class="ai-stage" id="aiStage">
+      <div class="ai-bubble" id="speech"></div>
+      <div class="ai-avatar-shell">
+        <div class="ai-avatar" id="aiAvatar"></div>
+        <div class="ai-nameplate" id="aiNameplate">江祈言</div>
+      </div>
+    </div>
+  </div>
+  <div class="float-hearts-layer" id="floatHearts"></div>
+  <div class="panel">
+    <h1>五子棋 · 人机对弈</h1>
+    <div class="sub">JIANG QIYAN · GOMOKU</div>
+    <div class="ai-info" id="aiInfo">当前 AI：<b>江祈言</b> · 正在载入</div>
+    <div class="material-bar">
+      <span class="label">落子数量</span>
+      <div class="bar-wrap">
+        <div class="bar-fill black" id="barBlack" style="width:50%"></div>
+        <div class="bar-fill white" id="barWhite" style="width:50%"></div>
+      </div>
+      <span class="diff-tag even" id="diffTag">黑 0 : 0 白</span>
+    </div>
+    <div class="status" id="status">加载 AI 后开始对局</div>
+    <div class="log-panel" id="logPanel"><div class="log-line" style="color:#8f84b5">— Jiang Qiyan · Gomoku Log —</div></div>
+    <div id="info"></div>
+    <div class="btn-row">
+      <button id="downloadLog" disabled>下载对局日志</button>
+      <button id="restart" class="ghost">重新开始</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="startScreen">
+  <div class="dialog">
+    <h2>五子棋 · 准备开局</h2>
+    <p>15 × 15 棋盘，<b>黑棋先行</b>，任意方向连成五子即获胜（自由规则、无禁手）。<br>棋盘始终保持固定方向，不会随阵营旋转。</p>
+    <div class="sec-title">选择执棋颜色</div>
+    <div class="choice" id="sideChoice">
+      <button data-color="1" class="active">● 执黑先手</button>
+      <button data-color="2">○ 执白后手</button>
+    </div>
+    <div class="sec-title">江祈言 · AI 强度</div>
+    <div class="sample-row">
+      <select id="builtinAiSelect" class="builtin-select">
+        <option value="100" selected>江祈言-100% · 深度战术搜索（高强度）</option>
+        <option value="50">江祈言-50% · 轻量搜索（适度削弱）</option>
+      </select>
+    </div>
+    <div class="ai-status" id="aiStatus">正在加载江祈言-100% …</div>
+    <div class="sec-title">可选：导入自定义五子棋 AI</div>
+    <div class="drop" id="dropZone">
+      <input type="file" id="aiFile" accept=".js,text/javascript,application/javascript" hidden>
+      将 <b>.js</b> 文件拖到这里，或 <u>点击导入</u><br>
+      <small>接口：window.ChessAI.chooseMove(ctx) → {row, col}</small>
+    </div>
+    <div class="mini-btns" style="margin-top:10px">
+      <button id="downloadSample" class="ghost">下载当前内置 AI（.js）</button>
+    </div>
+    <details class="adv-settings">
+      <summary>视觉与特效设置</summary>
+      <div class="adv-body">
+        <div class="adv-row"><label>AI 角色位置</label><select id="optAiPos">
+          <option value="below">棋盘正下方</option><option value="above">棋盘正上方</option><option value="topleft" selected>棋盘左上方</option>
+        </select></div>
+        <div class="adv-row"><label>气泡背景色</label><input type="color" id="optBgColor" value="#0d0d12"></div>
+        <div class="adv-row"><label>气泡边框色</label><input type="color" id="optBorderColor" value="#d946ef"></div>
+        <div class="adv-row"><label>台词字体色</label><input type="color" id="optFontColor" value="#e879ff"></div>
+        <div class="adv-row"><label>台词字体</label><select id="optFont">
+          <option value="cute" selected>可爱</option><option value="serif">衬线</option><option value="sans">无衬线</option><option value="mono">等宽</option>
+        </select></div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.12);font-size:11px;color:#8fa3b6">特效开关</div>
+        <div class="adv-row"><label>关键威胁棋子闪烁</label><input type="checkbox" id="fxShake" checked></div>
+        <div class="adv-row"><label>五子连珠胜利粒子</label><input type="checkbox" id="fxExplode" checked></div>
+        <div class="adv-row"><label>双威胁棋盘震动</label><input type="checkbox" id="fxQuake" checked></div>
+        <div class="adv-row"><label>冲四时棋盘光效</label><input type="checkbox" id="fxFire" checked></div>
+      </div>
+    </details>
+    <button id="startBtn" disabled>开始五子棋对弈</button>
+  </div>
+</div>
+<script type="text/plain" id="sampleAISource">
+/* 江祈言 · 五子棋策略引擎（无外部依赖）
+ * 标准 15×15 自由规则：连续五子及以上胜；无禁手。
+ * 100%：即时胜/必防检测 + 活四冲四活三判别 + 威胁优先的迭代加深
+ *        Alpha-Beta / PVS + 置换表 + 动态候选缩减 + 强制战术延伸。
+ * 50%：共享战术规则，缩短搜索并在接近的候选中加入有限扰动。
+ * 外部接口：window.ChessAI.chooseMove({board:二维 0/1/2,color:1/2,ply,level})
+ * 返回：{row,col,debug}。可单独下载成 .js 并导入页面。
+ */
+(function () {
+  'use strict';
+  var N=15, SIZE=225, WIN=90000000, INF=1000000000;
+  var DIR=[[1,0],[0,1],[1,1],[1,-1]];
+  var eLevel=100; // 50% 补丁覆盖这个字段
+  var TT=new Map(), ttCount=0;
+  var zA=new Int32Array(SIZE*3), zB=new Int32Array(SIZE*3);
+  (function(){var a=123456789,b=362436069;
+    function rand(){a^=a<<13;a^=a>>>17;a^=a<<5;b=(Math.imul(b^a,1664525)+1013904223)|0;return (a^b)|0;}
+    for(var i=0;i<zA.length;i++){zA[i]=rand();zB[i]=rand();}
+  })();
+  function rc(p){return [(p/15)|0,p%15];}
+  function valid(r,c){return r>=0&&r<15&&c>=0&&c<15;}
+  function other(side){return 3-side;}
+  function countFives(b,p,s){var r=(p/15)|0,c=p%15;
+    for(var k=0;k<4;k++){var dr=DIR[k][0],dc=DIR[k][1],n=1;
+      for(var t=1;t<5;t++){var a=r+dr*t,d=c+dc*t;if(!valid(a,d)||b[a*15+d]!==s)break;n++;}
+      for(var j=1;j<5;j++){var x=r-dr*j,y=c-dc*j;if(!valid(x,y)||b[x*15+y]!==s)break;n++;}
+      if(n>=5)return true;
+    }
+    return false;
+  }
+  // 棋形匹配必须覆盖新落子的中心点，防止沿线上其它棋形误记为当前落点的价值。
+  function containsCenter(s,pattern){
+    for(var i=s.indexOf(pattern);i>=0;i=s.indexOf(pattern,i+1)){
+      if(i<=5&&i+pattern.length>5)return true;
+    }
+    return false;
+  }
+  function anyCenter(s,items){
+    for(var i=0;i<items.length;i++)if(containsCenter(s,items[i]))return true;
+    return false;
+  }
+  function scorePoint(b,p,side){
+    if(b[p])return -1;
+    var row=(p/15)|0,col=p%15, score=0,fours=0,open3=0;
+    b[p]=side;
+    for(var k=0;k<4;k++){
+      var dr=DIR[k][0],dc=DIR[k][1];
+      var line=[],cell=[];
+      for(var off=-5;off<=5;off++){
+        var r=row+off*dr,c=col+off*dc;
+        if(!valid(r,c)){line.push('#');cell.push(-1);}
+        else{var ix=r*15+c,v=b[ix];line.push(v===side?'X':v===0?'.':'#');cell.push(ix);}
+      }
+      var s=line.join('');
+      // 这里的 5 个子位置必须包含新落下的中心点。
+      var wins={};
+      for(var j=1;j<=5;j++){
+        var xs=0,dots=0,gap=-1,ok=true;
+        for(var v=j;v<j+5;v++){
+          if(line[v]==='X')xs++;
+          else if(line[v]==='.') {dots++;gap=cell[v];}
+          else {ok=false;break;}
+        }
+        if(ok&&xs===5){b[p]=0;return WIN;}
+        if(ok&&xs===4&&dots===1&&gap>=0)wins[gap]=1;
+      }
+      var cnt=Object.keys(wins).length;
+      if(cnt>=2){score+=320000;fours+=2;}
+      else if(cnt===1){score+=42000;fours++;}
+      else {
+        // 包括跳活三；借助左右空点排除贴边及对手封堵。
+        if(anyCenter(s,['.XXX.','.XX.X.','.X.XX.'])){
+          var high=anyCenter(s,['..XXX..','.XXX..','..XXX.','..XX.X..','.X.XX..']);
+          score+=high?9000:4500;open3++;
+        }else if(anyCenter(s,['.XXX','XXX.','XX.X','X.XX']))score+=1200;
+        else if(anyCenter(s,['.XX.','.X.X.']))score+=420;
+        else if(anyCenter(s,['.XX','XX.','X.X']))score+=90;
+        else if(containsCenter(s,'.X.'))score+=22;
+      }
+    }
+    b[p]=0;
+    if(fours>=2)score+=280000;
+    else if(fours&&open3)score+=165000;
+    if(open3>=2)score+=42000;
+    // 守住中央基本盘，在分值相等时避免角落无效落子。
+    score+=Math.max(0,14-(Math.abs(row-7)+Math.abs(col-7)));
+    return score;
+  }
+  function candidates(b,side,limit,branch,ttBest){
+    var occupied=[],mark=new Uint8Array(SIZE);
+    for(var i=0;i<SIZE;i++)if(b[i])occupied.push(i);
+    if(occupied.length===0)return [{p:112,a:1,d:1,rank:1}];
+    for(var z=0;z<occupied.length;z++){
+      var o=occupied[z],r=(o/15)|0,c=o%15;
+      for(var dr=-2;dr<=2;dr++)for(var dc=-2;dc<=2;dc++){
+        var rr=r+dr,cc=c+dc;
+        if(valid(rr,cc)&&!b[rr*15+cc])mark[rr*15+cc]=1;
+      }
+    }
+    var all=[],theirWins=[],myWins=[];
+    for(var p=0;p<SIZE;p++)if(mark[p]){
+      var a=scorePoint(b,p,side),d=scorePoint(b,p,other(side));
+      var obj={p:p,a:a,d:d,rank:Math.max(a*1.15,d*1.06)+a*.07+d*.04};
+      if(p===ttBest)obj.rank+=850000;
+      all.push(obj);
+      if(a>=WIN)myWins.push(obj);
+      if(d>=WIN)theirWins.push(obj);
+    }
+    if(myWins.length)return myWins;
+    // 对手下一着已能获胜：唯一可行的落点只能在其成五点上。
+    if(theirWins.length){theirWins.sort(function(x,y){return y.a-x.a;});return theirWins;}
+    all.sort(function(x,y){return y.rank-x.rank;});
+    if(all.length===0)return [];
+    // 活四或双冲四：对手理论上无法单手全部封堵，强制先考虑。
+    var forced=all.filter(function(m){return m.a>=300000;});
+    if(forced.length)return forced.slice(0,Math.max(2,limit));
+    // 对手的活四/冲四威胁必须优先处理，但保留己方更强反击。
+    var defensive=all.filter(function(m){return m.d>=300000;});
+    if(defensive.length)return defensive.slice(0,Math.max(2,limit));
+    // 有我方冲四时只搜索威胁手和必要反制；保留至少几个战术选择。
+    var urgent=all.filter(function(m){return m.a>=42000||m.d>=42000;});
+    if(urgent.length){
+      var top=all.slice(0,Math.min(4,limit));
+      for(var t=0;t<urgent.length;t++)if(!top.some(function(z){return z.p===urgent[t].p;}))top.push(urgent[t]);
+      top.sort(function(x,y){return y.rank-x.rank;});
+      return top.slice(0,Math.max(4,limit));
+    }
+    return all.slice(0,limit);
+  }
+  function heuristic(b,side){
+    var x=candidates(b,side,5,0,-1);
+    if(!x.length)return 0;
+    var attack=x[0].a,def=x[0].d;
+    var secondA=0,secondD=0;
+    for(var i=1;i<x.length;i++){secondA=Math.max(secondA,x[i].a);secondD=Math.max(secondD,x[i].d);}
+    var score=attack*1.03+secondA*.19-def*1.13-secondD*.22;
+    return Math.max(-WIN/2,Math.min(WIN/2,score));
+  }
+  var nodes=0,clock=0,deadline=0,stop=false,level=100;
+  function key(h1,h2,side){return h1+':'+h2+':'+side;}
+  function calcHash(b){var h1=0,h2=0;for(var i=0;i<SIZE;i++)if(b[i]){h1^=zA[i*3+b[i]];h2^=zB[i*3+b[i]];}return [h1,h2];}
+  function search(b,side,depth,alpha,beta,ply,h1,h2,last,forcedExtension){
+    nodes++;
+    if((nodes&511)===0&&Date.now()>deadline){stop=true;return 0;}
+    if(last>=0&&countFives(b,last,other(side)))return -WIN+ply;
+    if(stop)return 0;
+    var k=key(h1,h2,side),hit=TT.get(k),origA=alpha,origB=beta;
+    if(hit&&hit.depth>=depth){
+      if(hit.flag===0)return hit.score;
+      if(hit.flag===1)alpha=Math.max(alpha,hit.score);
+      if(hit.flag===2)beta=Math.min(beta,hit.score);
+      if(alpha>=beta)return hit.score;
+    }
+    // 强制威胁延伸：在搜索边界仍不能漏掉直接杀棋与唯一防点。
+    if(depth<=0){
+      if(forcedExtension>0){
+        var tactics=candidates(b,side,5,0,hit?hit.best:-1);
+        if(tactics.length&&(tactics[0].a>=42000||tactics[0].d>=42000))depth=1;
+        else return heuristic(b,side);
+      }else return heuristic(b,side);
+    }
+    var width=depth>=6?7:depth>=4?8:depth>=2?10:12;
+    if(level===50)width=depth>=3?5:7;
+    var moves=candidates(b,side,width,depth,hit?hit.best:-1);
+    if(!moves.length)return 0;
+    var best=-INF,bestP=moves[0].p;
+    for(var i=0;i<moves.length;i++){
+      var mv=moves[i],p=mv.p,nh1=h1^zA[p*3+side],nh2=h2^zB[p*3+side];
+      b[p]=side;
+      var value;
+      if(mv.a>=WIN||countFives(b,p,side))value=WIN-ply-1;
+      else {
+        var nextDepth=depth-1;
+        // 非战术分支不伸长；战术分支在较浅搜索边界额外看 1 层。
+        var extension=forcedExtension-((depth<=1)?1:0);
+        if(i>4&&depth>=4&&mv.a<1200&&mv.d<1200){
+          value=-search(b,other(side),nextDepth-1,-alpha-1,-alpha,ply+1,nh1,nh2,p,extension);
+          if(value>alpha)value=-search(b,other(side),nextDepth,-beta,-alpha,ply+1,nh1,nh2,p,extension);
+        }else if(i===0){
+          value=-search(b,other(side),nextDepth,-beta,-alpha,ply+1,nh1,nh2,p,extension);
+        }else{
+          // Principal Variation Search: 先以窄窗口试探再按需重搜。
+          value=-search(b,other(side),nextDepth,-alpha-1,-alpha,ply+1,nh1,nh2,p,extension);
+          if(value>alpha&&value<beta)
+            value=-search(b,other(side),nextDepth,-beta,-alpha,ply+1,nh1,nh2,p,extension);
+        }
+      }
+      b[p]=0;
+      if(stop)return 0;
+      if(value>best){best=value;bestP=p;}
+      if(value>alpha)alpha=value;
+      if(alpha>=beta)break;
+    }
+    if(TT.size>85000)TT.clear();
+    TT.set(k,{score:best,best:bestP,depth:depth,flag:best<=origA?2:best>=origB?1:0});
+    return best;
+  }
+  function moveChoice(ctx){
+    var board=ctx.board||[],b=new Uint8Array(SIZE);
+    for(var r=0;r<N;r++)for(var c=0;c<N;c++){
+      var v=board[r]&&board[r][c];
+      b[r*N+c]=v===1||v===2?v:0;
+    }
+    var side=ctx.color===2?2:1;
+    level=(typeof ctx.level==='number'?ctx.level:eLevel)===50?50:100;
+    nodes=0;stop=false;clock=Date.now();deadline=clock+(level===100?2450:310);
+    var hash=calcHash(b),root=candidates(b,side,level===100?14:10,0,-1);
+    if(!root.length)return null;
+    var best=root[0].p,score=0,depthDone=0;
+    // 当场可赢、唯一防守点及空棋盘不做多余搜索。
+    if(root.length===1||root[0].a>=WIN){
+      return {row:(best/15)|0,col:best%15,debug:{algorithm:'强制战术优先',depth:0,nodes:0,timeMs:Date.now()-clock,score:root[0].a}};
+    }
+    // 我方活四/双四基本构成强制胜势，仍尽量补充搜索确认。
+    var maxDepth=level===100?9:3;
+    for(var d=1;d<=maxDepth;d++){
+      if(Date.now()>=deadline)break;
+      var ordered=candidates(b,side,d>=6?8:d>=4?10:13,0,best);
+      if(ordered.length===0)break;
+      var localBest=ordered[0].p,localScore=-INF,alpha=-INF,beta=INF;
+      for(var j=0;j<ordered.length;j++){
+        var mv=ordered[j],p=mv.p; b[p]=side;
+        var v;
+        if(mv.a>=WIN||countFives(b,p,side))v=WIN-1;
+        else v=-search(b,other(side),d-1,-beta,-alpha,1,hash[0]^zA[p*3+side],hash[1]^zB[p*3+side],p,level===100?2:0);
+        b[p]=0;
+        if(stop)break;
+        if(v>localScore){localScore=v;localBest=p;}
+        if(v>alpha)alpha=v;
+      }
+      if(stop)break;
+      best=localBest;score=localScore;depthDone=d;
+      if(score>WIN-1000)break;
+      if(level===50&&d>=2)break;
+    }
+    // 50% 仅对数值差距较小的非致胜候选随机化，不故意放任直接五连。
+    if(level===50&&score<WIN/2&&root[0].a<WIN&&root[0].d<WIN){
+      var candidatePool=root.filter(function(x){
+        return x.a<WIN&&x.d<WIN&&x.rank>=root[0].rank*.75;
+      }).slice(0,5);
+      if(candidatePool.length>1&&Math.random()<.34){
+        var pick=candidatePool[Math.floor(Math.random()*candidatePool.length)];
+        best=pick.p;
+      }
+    }
+    return {row:(best/15)|0,col:best%15,debug:{algorithm:level===100?'迭代深化 + PVS/Alpha-Beta + 威胁搜索':'轻量搜索 + 威胁防守',depth:depthDone,nodes:nodes,timeMs:Date.now()-clock,score:Math.round(score)}};
+  }
+  var LINES={
+    start:['五子连珠就算赢。先说好，我可不会随便让。','棋盘摆好了，来看看你的第一手。','落子无悔哦，准备好就开始吧。'],
+    thinking:['这边能接几条线……让我算一下。','先看你的威胁，再想我的反击。','嗯，这步需要推演几手。','我在算变化，别催。'],
+    sleeping:['你在思考一盘世界名局吗？','我先眯一会儿，轮到你下了。','棋盘都快长蘑菇了。'],
+    move:['这颗落在这里。','我先占住这个交叉点。','往这一边延伸一下。','看起来平静，后面可不一定。','这里的形状更舒服。'],
+    afterOpponentMove:['这手我看见了。','哦？换方向进攻吗？','这颗子有点意思。','先别急着得意。'],
+    block:['这条线先给你堵上。','差一点就让你连起来了。','该防的时候，还是要防。','你的四连，我可不会装没看见。'],
+    threat:['现在轮到你想办法防守了。','冲四不是终点，后面还有手段。','我这里可不止一条路。','小心，棋形开始危险了。'],
+    win:['五子连成线。这盘我收下了。','这条五连，你没拦住。','胜负已分，下局再来？'],
+    lose:['厉害，五子连珠。你赢了。','这一手确实没看住。','好棋。这局你拿下了。'],
+    draw:['棋盘下满了，算平局。','谁也没连成五子，平局。']
+  };
+  window.ChessAI={name:'江祈言-100%',version:'5.0-gomoku',level:100,lines:LINES,emojis:null,chooseMove:moveChoice};
+})();
+
+</script>
+<script type="text/plain" id="sampleAIWeakPatch">
+(function(){
+  'use strict';
+  var a=window.ChessAI;
+  if(!a||typeof a.chooseMove!=='function')return;
+  a.name='江祈言-50%';a.version='5.0-gomoku-lite';a.level=50;
+  var orig=a.chooseMove;
+  a.chooseMove=function(ctx){var next=Object.assign({},ctx,{level:50});return orig(next);};
+  a.lines=Object.assign({},a.lines||{}, {
+    thinking:['唔……今天轻松一点。','大概是这里吧，我再看一眼。','这么多格子，先挑一处。'],
+    move:['试试看这步。','这次凭一点直觉。','不必每一步都那么严肃。'],
+    block:['还好我发现了这条线。','先挡一下，安全第一。'],
+    win:['欸？竟然又连成五子了。','赢啦，这局运气不错。'],
+    lose:['这局你确实下得更好。','被你连成五子了，厉害。']
+  });
+})();
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var N=15, MAX=225, EMPTY=0, BLACK=1, WHITE=2;
+  var CN={1:'黑方',2:'白方'}, SHORT={1:'黑',2:'白'}, FILES='ABCDEFGHIJKLMNO';
+  var BUBBLE_MS=3200, HUMAN_WAIT_MS=30000;
+  var DEFAULT_EMOJI={default:'🤖',thinking:'🤔',sleeping:'😴',start:'★',win:'✨',lose:'💧',draw:'😐',move:'♪',afterOpponentMove:'?',block:'🛡',threat:'⚡'};
+  var FONT_MAP={cute:'"Comic Sans MS", "Chalkboard SE", "PingFang SC", cursive',serif:'Georgia, "Songti SC", serif',sans:'"Segoe UI", "PingFang SC", sans-serif',mono:'Consolas, Menlo, monospace'};
+  var $=function(id){return document.getElementById(id);};
+  var boardEl=$('board'), boardContainer=$('boardContainer'), infoEl=$('info'), statusEl=$('status');
+  var aiInfoEl=$('aiInfo'), speechBubble=$('speech'), avatarEl=$('aiAvatar'), aiNameplate=$('aiNameplate');
+  var startScreen=$('startScreen'), sideChoice=$('sideChoice'), dropZone=$('dropZone');
+  var aiFileInput=$('aiFile'), aiStatusEl=$('aiStatus'), builtinAiSelect=$('builtinAiSelect');
+  var downloadSampleBtn=$('downloadSample'), startBtn=$('startBtn'), restartBtn=$('restart');
+  var downloadLogBtn=$('downloadLog'), logPanel=$('logPanel'), barBlack=$('barBlack'), barWhite=$('barWhite');
+  var diffTag=$('diffTag'), fireLayer=$('fireLayer'), floatHearts=$('floatHearts');
+  var board=new Uint8Array(MAX),turn=BLACK,humanColor=BLACK,aiColor=WHITE,selectedSide=BLACK;
+  var gameOver=true,aiThinking=false,lastMove=-1,winnerLine=[],gameLog=null,gameToken=0;
+  var loadedAI=null, loadedSource='', activeWorker=null, activeAIUrl=null;
+  var speechTimer=null,currentEmojiEvent=null,emojiCache={},humanWaitTimer=null;
+  var statusText='加载五子棋 AI 后开始对局';
+  var fxEnabled={shake:true,explode:true,quake:true,fire:true};
+  var DIRECTIONS=[[1,0],[0,1],[1,1],[1,-1]];
+  function other(v){return 3-v;}
+  function rc(p){return [(p/N)|0,p%N];}
+  function posName(p){var q=rc(p);return FILES[q[1]]+(q[0]+1);}
+  function posValid(r,c){return r>=0&&r<N&&c>=0&&c<N;}
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,function(v){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[v];});}
+
+  /* 原网页的小爱心背景及江祈言动态像素角色 */
+  function createPixelHearts() {
+    if (!floatHearts) return;
+    floatHearts.innerHTML = '';
+    for (var i = 0; i < 18; i++) {
+      var h = document.createElement('div');
+      h.className = 'pixel-heart';
+      h.style.left = (Math.random() * 92 + 2) + '%';
+      h.style.top = (Math.random() * 86 + 10) + '%';
+      h.style.setProperty('--s', (0.7 + Math.random() * 1.2).toFixed(2));
+      h.style.setProperty('--dx', (Math.random() * 40 - 20).toFixed(0) + 'px');
+      h.style.setProperty('--travel', (360 + Math.random() * 280).toFixed(0) + 'px');
+      h.style.animationDuration = (12 + Math.random() * 14).toFixed(2) + 's';
+      h.style.animationDelay = (-Math.random() * 16).toFixed(2) + 's';
+      h.style.opacity = (0.18 + Math.random() * 0.24).toFixed(2);
+      floatHearts.appendChild(h);
+    }
+  }
+
+
+  function hasLines(ai) {
+    if (!ai || !ai.lines || typeof ai.lines !== 'object') return false;
+    for (var k in ai.lines) if (Object.prototype.hasOwnProperty.call(ai.lines, k)) return true;
+    return false;
+  }
+
+  function pickLine(lines, event, ctx) {
+    var val = lines[event];
+    if (!val) return null;
+    if (typeof val === 'function') { try { return val(ctx) || null; } catch (e) { return null; } }
+    if (Array.isArray(val)) {
+      if (!val.length) return null;
+      var s = val[Math.floor(Math.random() * val.length)];
+      if (typeof s === 'function') { try { return s(ctx) || null; } catch (e) { return null; } }
+      return String(s);
+    }
+    return String(val);
+  }
+
+  var IMG_EXT = /\.(gif|png|jpe?g|webp|svg)$/i;
+
+  function resolveEmojiPath(event) {
+    var em = loadedAI && loadedAI.emojis;
+    if (!em) return null;
+    if (typeof em === 'string') {
+      var s = em.trim();
+      if (!s) return null;
+      if (IMG_EXT.test(s)) return s;
+      var f = s.endsWith('/') ? s : s + '/';
+      return f + event + '.gif';
+    }
+    if (typeof em === 'object') {
+      var folder = typeof em.folder === 'string' ? em.folder.trim() : '';
+      var own = em[event];
+      if (typeof own === 'string' && own.trim()) {
+        var p = own.trim();
+        if (folder && p.indexOf('/') === -1 && !IMG_EXT.test(p)) {
+          var ff = folder.endsWith('/') ? folder : folder + '/';
+          return ff + p + '.gif';
+        }
+        return p;
+      }
+      if (folder) {
+        var ff2 = folder.endsWith('/') ? folder : folder + '/';
+        return ff2 + event + '.gif';
+      }
+    }
+    return null;
+  }
+
+  function preloadEmoji(path) {
+    if (!path || emojiCache[path]) return;
+    var img = new Image();
+    img.onload = function () { emojiCache[path] = 'ok'; };
+    img.onerror = function () { emojiCache[path] = 'err'; };
+    img.src = path;
+  }
+
+  function preloadAllEmojis() {
+    Object.keys(DEFAULT_EMOJI).forEach(function (ev) {
+      var p = resolveEmojiPath(ev);
+      if (p) preloadEmoji(p);
+    });
+  }
+
+  function avatarMoodClass(event) {
+    switch (event) {
+      case 'thinking': return 'mood-thinking';
+      case 'block': return 'mood-block';
+      case 'threat': return 'mood-threat';
+      case 'sleeping': return 'mood-sleeping';
+      case 'start': return 'mood-start';
+      case 'win': return 'mood-win';
+      case 'lose': return 'mood-lose';
+      case 'draw': return 'mood-draw';
+      case 'captureQueen': return 'mood-capturequeen';
+      case 'lostQueen': return 'mood-lostqueen';
+      case 'capturePiece': return 'mood-capturepiece';
+      case 'lostPiece': return 'mood-lostpiece';
+      case 'check': return 'mood-check';
+      case 'inCheck': return 'mood-incheck';
+      case 'move': return 'mood-move';
+      case 'afterOpponentMove': return 'mood-aftermove';
+      case 'promotion': return 'mood-promotion';
+      case 'tauntPromotion': return 'mood-taunt';
+      default: return 'mood-default';
+    }
+  }
+
+  function avatarFxSymbol(event, fallback) {
+    var map = {
+      default: '♥', thinking: '?', sleeping: 'Zzz', start: '★', win: '✦', lose: '…', draw: '—',
+      captureQueen: '♥+', lostQueen: '!!', capturePiece: '♪', lostPiece: '…', check: '!!', inCheck: '!?',
+      move: '♪', afterOpponentMove: '?', block: '▣', threat: '!!', promotion: 'UP', tauntPromotion: '呵'
+    };
+    return map[event] || fallback || '♥';
+  }
+
+  function renderAvatarMascot(event, fallback) {
+    var mood = avatarMoodClass(event || 'default');
+    avatarEl.innerHTML =
+      '<div class="mascot ' + mood + '">' +
+        '<div class="fx-symbol">' + escapeHtml(avatarFxSymbol(event || 'default', fallback || '♥')) + '</div>' +
+        '<div class="heart-spark"></div>' +
+        '<div class="tail left"></div>' +
+        '<div class="tail right"></div>' +
+        '<div class="ear left"></div>' +
+        '<div class="ear right"></div>' +
+        '<div class="head">' +
+          '<div class="bangs"></div>' +
+          '<div class="face">' +
+            '<div class="brow left"></div>' +
+            '<div class="brow right"></div>' +
+            '<div class="eye left"><div class="iris"></div></div>' +
+            '<div class="eye right"><div class="iris"></div></div>' +
+            '<div class="blush left"></div>' +
+            '<div class="blush right"></div>' +
+            '<div class="mouth"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="bow top"></div>' +
+        '<div class="bow bottom"></div>' +
+        '<div class="hoodie"><div class="skull"><i></i></div></div>' +
+        '<div class="hand"></div>' +
+      '</div>';
+  }
+
+  function renderAvatarText(char) {
+    renderAvatarMascot(currentEmojiEvent || 'default', char || '♥');
+  }
+
+  function renderAvatarImg(path, event, fallback) {
+    var img = document.createElement('img');
+    img.alt = event;
+    img.src = path;
+    img.onerror = function () {
+      emojiCache[path] = 'err';
+      if (currentEmojiEvent === event) renderAvatarMascot(event, fallback);
+    };
+    avatarEl.innerHTML = '';
+    avatarEl.appendChild(img);
+  }
+
+  function setAIEmoji(event) {
+    if (currentEmojiEvent === event) {
+      renderAvatarMascot(event, DEFAULT_EMOJI[event] || DEFAULT_EMOJI.default);
+      return;
+    }
+    currentEmojiEvent = event;
+    var fallback = DEFAULT_EMOJI[event] || DEFAULT_EMOJI.default;
+    var path = resolveEmojiPath(event);
+    if (!path) { renderAvatarMascot(event, fallback); return; }
+    var st = emojiCache[path];
+    if (st === 'err') { renderAvatarMascot(event, fallback); return; }
+    if (st === 'ok') { renderAvatarImg(path, event, fallback); return; }
+    renderAvatarMascot(event, fallback);
+    var test = new Image();
+    test.onload = function () {
+      emojiCache[path] = 'ok';
+      if (currentEmojiEvent === event) renderAvatarImg(path, event, fallback);
+    };
+    test.onerror = function () {
+      emojiCache[path] = 'err';
+      if (currentEmojiEvent === event) renderAvatarMascot(event, fallback);
+    };
+    test.src = path;
+  }
+
+  function showSpeech(text, event, duration) {
+    if (!text) return;
+    duration = duration || BUBBLE_MS;
+    speechBubble.textContent = text;
+    speechBubble.classList.add('show');
+    if (event) setAIEmoji(event);
+    clearTimeout(speechTimer);
+    speechTimer = setTimeout(function () {
+      speechBubble.classList.remove('show');
+      setAIEmoji('default');
+    }, duration);
+  }
+
+  function clearSpeech() {
+    clearTimeout(speechTimer);
+    speechBubble.classList.remove('show');
+    speechBubble.textContent = '';
+    setAIEmoji('default');
+  }
+
+  function aiSay(event, ctx) {
+    if (!loadedAI || !hasLines(loadedAI)) return null;
+    var text = pickLine(loadedAI.lines, event, ctx || {});
+    if (!text) return null;
+    showSpeech(text, event);
+    return text;
+  }
+
+
+
+  function countStones(){var n=[0,0,0];for(var i=0;i<MAX;i++)n[board[i]]++;return n;}
+  function winLineAt(p,side){
+    var r=(p/15)|0,c=p%15;
+    for(var k=0;k<4;k++){
+      var dr=DIRECTIONS[k][0],dc=DIRECTIONS[k][1],line=[p];
+      for(var d=1;d<15;d++){var nr=r+dr*d,nc=c+dc*d;if(!posValid(nr,nc)||board[nr*15+nc]!==side)break;line.push(nr*15+nc);}
+      for(var e=1;e<15;e++){var rr=r-dr*e,cc=c-dc*e;if(!posValid(rr,cc)||board[rr*15+cc]!==side)break;line.unshift(rr*15+cc);}
+      if(line.length>=5)return line;
+    }
+    return null;
+  }
+  function winningPlaces(b,side){
+    var result=[];
+    for(var p=0;p<MAX;p++)if(!b[p]){
+      var r=(p/15)|0,c=p%15,winning=false;
+      for(var k=0;k<4;k++){
+        var dr=DIRECTIONS[k][0],dc=DIRECTIONS[k][1],total=1;
+        for(var j=1;j<5;j++){var rr=r+j*dr,cc=c+j*dc;if(!posValid(rr,cc)||b[rr*15+cc]!==side)break;total++;}
+        for(var h=1;h<5;h++){var r2=r-h*dr,c2=c-h*dc;if(!posValid(r2,c2)||b[r2*15+c2]!==side)break;total++;}
+        if(total>=5){winning=true;break;}
+      }
+      if(winning)result.push(p);
+    }
+    return result;
+  }
+  function bestFallback(ctx){
+    var b=new Uint8Array(ctx.board.flat()),self=ctx.color,opp=other(self);
+    var a=winningPlaces(b,self),d=winningPlaces(b,opp);
+    var p=a[0]??d[0];
+    if(p===undefined){
+      var options=[];for(var i=0;i<MAX;i++)if(!b[i]){
+        var r=(i/15)|0,c=i%15,val=16-Math.abs(r-7)-Math.abs(c-7);
+        for(var j=0;j<MAX;j++)if(b[j]){var qr=(j/15)|0,qc=j%15;
+          var dist=Math.max(Math.abs(r-qr),Math.abs(c-qc));if(dist===1)val+=9;else if(dist===2)val+=3;
+        }
+        options.push([val,i]);
+      }
+      options.sort(function(x,y){return y[0]-x[0];});p=options.length?options[0][1]:112;
+    }
+    return {row:(p/15)|0,col:p%15,debug:{algorithm:'安全兜底（优先成五与防五）',depth:0}};
+  }
+  function render(){
+    boardEl.innerHTML='';
+    var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('viewBox','0 0 16 16');svg.setAttribute('class','grid-art');svg.setAttribute('aria-hidden','true');
+    var paths=[];for(var i=1;i<=15;i++)paths.push('M 1 '+i+' H 15 M '+i+' 1 V 15');
+    var path=document.createElementNS(svg.namespaceURI,'path');path.setAttribute('d',paths.join(' '));path.setAttribute('fill','none');path.setAttribute('stroke','rgba(58,31,86,.77)');path.setAttribute('stroke-width','.036');svg.appendChild(path);
+    [[4,4],[4,8],[4,12],[8,4],[8,8],[8,12],[12,4],[12,8],[12,12]].forEach(function(p){
+      var dot=document.createElementNS(svg.namespaceURI,'circle');dot.setAttribute('cx',p[1]);dot.setAttribute('cy',p[0]);dot.setAttribute('r','.10');dot.setAttribute('fill','#43275b');svg.appendChild(dot);
+    });
+    boardEl.appendChild(svg);
+    for(var p=0;p<MAX;p++){
+      var r=(p/15)|0,c=p%15;
+      var btn=document.createElement('button');btn.type='button';btn.className='intersection';
+      btn.style.setProperty('--x',c+1);btn.style.setProperty('--y',r+1);
+      btn.title=posName(p)+(board[p]?' · '+CN[board[p]]:' · 空位');
+      btn.setAttribute('aria-label',btn.title);
+      if(board[p]){
+        btn.classList.add(board[p]===BLACK?'black-stone':'white-stone');
+        var stone=document.createElement('span');stone.className='stone';btn.appendChild(stone);
+      }else if(!gameOver&&turn===humanColor&&!aiThinking){btn.classList.add('can-place');}
+      if(lastMove===p)btn.classList.add('last-place');
+      if(winnerLine.includes(p))btn.classList.add('win-place');
+      (function(ix){btn.addEventListener('click',function(){humanMove(ix);});})(p);
+      boardEl.appendChild(btn);
+    }
+    statusEl.textContent=statusText;
+    renderInfo();updateCountBar();updateFireEffect();
+  }
+  function renderInfo(){
+    var counts=countStones();
+    var curr=lastMove<0?'尚未落子':posName(lastMove)+' · '+CN[board[lastMove]];
+    infoEl.innerHTML='<div class="info-title">落子信息 <span class="coord">15 × 15</span></div>'+
+      '<div class="row"><span>规则</span><b>自由五子棋（无禁手）</b></div>'+
+      '<div class="row"><span>首手</span><b>黑棋先行 · 不旋转棋盘</b></div>'+
+      '<div class="row"><span>上一手</span><b>'+escapeHtml(curr)+'</b></div>'+
+      '<div class="row total"><span>已落子</span><b>'+(counts[BLACK]+counts[WHITE])+' / 225</b></div>';
+  }
+  function updateCountBar(){
+    var n=countStones(),sum=n[BLACK]+n[WHITE],share=sum?n[BLACK]/sum*100:50;
+    barBlack.style.width=share+'%';barWhite.style.width=(100-share)+'%';
+    diffTag.textContent='黑 '+n[BLACK]+' : '+n[WHITE]+' 白';
+    diffTag.className='diff-tag even';
+  }
+  function updateFireEffect(){
+    if(!fxEnabled.fire||gameOver){fireLayer.className='fire-layer';return;}
+    var b=winningPlaces(board,BLACK),w=winningPlaces(board,WHITE);
+    if(b.length){fireLayer.className='fire-layer active bottom';}
+    else if(w.length){fireLayer.className='fire-layer active top';}
+    else fireLayer.className='fire-layer';
+  }
+  function playQuake(){if(!fxEnabled.quake)return;boardEl.classList.remove('quake');void boardEl.offsetWidth;boardEl.classList.add('quake');setTimeout(function(){boardEl.classList.remove('quake');},760);}
+  function explodeAt(p){
+    if(!fxEnabled.explode)return;
+    var elem=boardEl.children[p+1];if(!elem)return;
+    var cr=elem.getBoundingClientRect(),br=boardEl.getBoundingClientRect();
+    var x=cr.left+cr.width/2-br.left,y=cr.top+cr.height/2-br.top;
+    for(var i=0;i<36;i++){
+      var sp=document.createElement('div');sp.className='particle';sp.style.left=x+'px';sp.style.top=y+'px';
+      var a=Math.random()*Math.PI*2,len=30+Math.random()*105;
+      sp.style.setProperty('--dx',(Math.cos(a)*len)+'px');sp.style.setProperty('--dy',(Math.sin(a)*len)+'px');
+      sp.style.background=i%2?'#ff74d1':'#ffe48b';boardEl.appendChild(sp);
+      (function(el){setTimeout(function(){el.remove();},1700);})(sp);
+    }
+  }
+  function appendLog(p,side,meta){
+    var row=document.createElement('div');row.className='log-line';
+    var debug=meta.debug||{};
+    row.innerHTML='<span class="ply">'+gameLog.moves.length+'.</span> <span class="'+(side===BLACK?'b-piece':'w-piece')+'">'+CN[side]+'</span> '+posName(p)+
+      (meta.actor==='ai'?' <span class="ai-meta">d'+(debug.depth??'—')+' / '+Math.round(meta.elapsedMs??0)+'ms</span>':'');
+    logPanel.appendChild(row);while(logPanel.children.length>55)logPanel.removeChild(logPanel.firstChild);
+    logPanel.scrollTop=logPanel.scrollHeight;
+  }
+  function startHumanTimer(){
+    stopHumanTimer();
+    humanWaitTimer=setTimeout(function(){if(gameOver||aiThinking||turn!==humanColor)return;
+      var t=hasLines(loadedAI)&&pickLine(loadedAI.lines,'sleeping',{ply:gameLog.moves.length});
+      if(t)showSpeech(t,'sleeping',4400);else setAIEmoji('sleeping');
+    },HUMAN_WAIT_MS);
+  }
+  function stopHumanTimer(){clearTimeout(humanWaitTimer);humanWaitTimer=null;}
+  function endGame(win,line){
+    gameOver=true;aiThinking=false;stopHumanTimer();winnerLine=line||[];
+    var type=win?'five':'draw',winner=win||null;
+    gameLog.result={type:type,winner:winner,text:win?CN[win]+'五子连珠获胜！':'棋盘已满，平局'};
+    gameLog.endTime=new Date().toISOString();gameLog.durationMs=Date.now()-gameLog.startMs;
+    downloadLogBtn.disabled=false;
+    return win===aiColor?'win':win===humanColor?'lose':'draw';
+  }
+  function nextStatus(){return '轮到 '+CN[turn]+'（'+(turn===humanColor?'你':'江祈言')+'）落子';}
+  function place(p,meta){
+    if(gameOver||board[p]||turn!==(meta.actor==='human'?humanColor:aiColor))return;
+    var mover=turn;board[p]=mover;lastMove=p;turn=other(turn);
+    var line=winLineAt(p,mover),filled=countStones();
+    var ended=!!line||(filled[0]===0);
+    var mood=null;
+    if(ended)mood=endGame(line?mover:null,line);
+    gameLog.moves.push({ply:gameLog.moves.length+1,time:new Date().toISOString(),side:mover,actor:meta.actor,
+      row:(p/15)|0,col:p%15,at:posName(p),elapsedMs:meta.elapsedMs??null,aiDebug:meta.debug||null,
+      aiError:meta.error||null,boardAfter:Array.from(board)});
+    appendLog(p,mover,meta);
+    var text=null;
+    if(ended){text=aiSay(mood,{ply:gameLog.moves.length,at:posName(p)});}
+    else {
+      var nextWins=winningPlaces(board,mover),oppWins=winningPlaces(board,turn);
+      if(meta.actor==='ai'){
+        if(nextWins.length)text=aiSay('threat',{ply:gameLog.moves.length,at:posName(p)});
+        else if(meta.blocked)text=aiSay('block',{ply:gameLog.moves.length});
+        else if(Math.random()<.34)text=aiSay('move',{ply:gameLog.moves.length});
+        if(nextWins.length>=2&&fxEnabled.quake)playQuake();
+      }else if(Math.random()<.27)text=aiSay('afterOpponentMove',{ply:gameLog.moves.length});
+      if(!text&&fxEnabled.shake&&oppWins.length){
+        // 只让刚刚落下的关键棋子闪烁，不涉及将军或王。
+        setTimeout(function(){var el=boardEl.children[p+1];if(el)el.classList.add('urgent');},0);
+      }
+    }
+    statusText=ended?gameLog.result.text:nextStatus();render();
+    if(ended){if(line)setTimeout(function(){explodeAt(p);},160);return;}
+    if(turn===aiColor)scheduleAIMove();else startHumanTimer();
+  }
+  function humanMove(p){
+    if(gameOver||aiThinking||turn!==humanColor||board[p])return;
+    stopHumanTimer();place(p,{actor:'human'});
+  }
+  function buildCtx(){
+    var b=[],moves=[];
+    for(var r=0;r<N;r++){
+      var row=[];for(var c=0;c<N;c++){
+        var v=board[r*15+c];row.push(v);
+        if(!v)moves.push({row:r,col:c,to:[r,c]});
+      }b.push(row);
+    }
+    return {board:b,color:aiColor,ply:gameLog.moves.length,moves:moves,
+      rules:{size:15,first:BLACK,winLength:5,forbiddenMoves:false},
+      api:{winningPlaces:function(arr,color){var z=new Uint8Array(arr.flat());return winningPlaces(z,color).map(rc);}}
+    };
+  }
+  function killWorker(){
+    if(activeWorker){activeWorker.terminate();activeWorker=null;}
+    if(activeAIUrl){URL.revokeObjectURL(activeAIUrl);activeAIUrl=null;}
+  }
+  function askWorker(ctx){
+    return new Promise(function(resolve,reject){
+      if(typeof Worker==='undefined'){reject(new Error('不支持 Web Worker'));return;}
+      var source='var window=self;\n'+loadedSource+'\n'+
+        'self.onmessage=async function(e){try{var t=Date.now();var result=await self.ChessAI.chooseMove(e.data);self.postMessage({ok:true,decision:result,elapsed:Date.now()-t});}catch(ex){self.postMessage({ok:false,error:String(ex&&ex.message||ex)});}};';
+      try {
+        var blob=new Blob([source],{type:'text/javascript'});
+        activeAIUrl=URL.createObjectURL(blob);
+        activeWorker=new Worker(activeAIUrl);
+        var w=activeWorker,done=false;
+        function finish(err,res){if(done)return;done=true;clearTimeout(timeout);if(activeWorker===w)killWorker();if(err)reject(err);else resolve(res);}
+        var timeout=setTimeout(function(){finish(new Error('搜索超时'));},8000);
+        w.onmessage=function(e){var data=e.data;if(!data.ok)finish(new Error(data.error));else finish(null,data);};
+        w.onerror=function(e){finish(new Error('AI 工作线程异常：'+(e.message||'unknown')));};
+        w.postMessage({board:ctx.board,color:ctx.color,ply:ctx.ply,level:loadedAI.level??100,moves:ctx.moves});
+      }catch(e){killWorker();reject(e);}
+    });
+  }
+  function normalizeDecision(result){
+    if(!result)return -1;
+    var r=result.row,c=result.col;
+    if(result.to&&Array.isArray(result.to)){r=result.to[0];c=result.to[1];}
+    if(Array.isArray(result)){r=result[0];c=result[1];}
+    if(!Number.isInteger(r)||!Number.isInteger(c)||!posValid(r,c))return -1;
+    var p=r*15+c;return board[p]?-1:p;
+  }
+  function scheduleAIMove(){
+    if(gameOver||turn!==aiColor||!loadedAI)return;
+    aiThinking=true;stopHumanTimer();
+    statusText='江祈言正在推演棋路…';statusEl.textContent=statusText;
+    if(!aiSay('thinking',{ply:gameLog.moves.length}))setAIEmoji('thinking');
+    var token=gameToken,start=performance.now(),ctx=buildCtx(),humanThreat=winningPlaces(board,humanColor);
+    var thinkPromise;
+    // 单 HTML 打开即可：优先后台 Worker 防止搜索期间界面卡住；不支持则主线程兜底。
+    try {thinkPromise=askWorker(ctx).catch(function(){return Promise.resolve().then(function(){return {decision:loadedAI.chooseMove(ctx)};});});}
+    catch(e){thinkPromise=Promise.resolve().then(function(){return {decision:loadedAI.chooseMove(ctx)};});}
+    thinkPromise.then(function(result){
+      if(token!==gameToken||gameOver||turn!==aiColor)return;
+      var decision=result&&result.decision;
+      var p=normalizeDecision(decision),err=null;
+      if(p<0){err='AI 返回非法落点，使用安全兜底';decision=bestFallback(ctx);p=normalizeDecision(decision);}
+      if(p<0){p=board.findIndex(function(v){return !v;});}
+      aiThinking=false;
+      if(p>=0)place(p,{actor:'ai',elapsedMs:performance.now()-start,debug:decision&&decision.debug,error:err,blocked:humanThreat.includes(p)});
+    }).catch(function(err){
+      if(token!==gameToken||gameOver)return;
+      var safe=bestFallback(ctx),p=normalizeDecision(safe);
+      aiThinking=false;
+      if(p>=0)place(p,{actor:'ai',elapsedMs:performance.now()-start,debug:safe.debug,error:String(err)});
+    });
+  }
+  /* 自定义 .js 仍支持 window.ChessAI = {chooseMove(ctx), name, lines, emojis} */
+  function loadAISource(code,label){
+    return new Promise(function(resolve,reject){
+      window.ChessAI=undefined;
+      var blob=new Blob([code],{type:'text/javascript'}),url=URL.createObjectURL(blob);
+      var script=document.createElement('script'),done=false;
+      function finish(err){if(done)return;done=true;URL.revokeObjectURL(url);script.remove();
+        if(err){reject(err);return;}
+        if(!window.ChessAI||typeof window.ChessAI.chooseMove!=='function'){reject(new Error('必须实现 window.ChessAI.chooseMove(ctx)'));return;}
+        resolve({ai:window.ChessAI,code:code,label:label});
+      }
+      script.onload=function(){finish(null);};script.onerror=function(){finish(new Error('无法加载 AI 脚本'));};
+      document.head.appendChild(script);script.src=url;
+    });
+  }
+  function onAILoaded(data){
+    loadedAI=data.ai;loadedSource=data.code;emojiCache={};currentEmojiEvent=null;
+    var name=loadedAI.name||'未命名 AI',ver=loadedAI.version||'?';
+    setAIStatus('✔ 已加载：'+name+' v'+ver+' · '+data.label,'ok');
+    aiInfoEl.innerHTML='当前 AI：<b>'+escapeHtml(name)+'</b> · '+escapeHtml(String(ver));
+    aiNameplate.textContent=name;startBtn.disabled=false;setAIEmoji('default');preloadAllEmojis();
+  }
+  function setAIStatus(msg,cls){aiStatusEl.textContent=msg;aiStatusEl.className='ai-status'+(cls?' '+cls:'');}
+  function onAIError(err){loadedAI=null;loadedSource='';startBtn.disabled=true;setAIStatus('✘ '+String(err.message||err),'err');}
+  function handleAIFile(file){
+    if(!file)return;setAIStatus('正在加载：'+file.name+' …');
+    var reader=new FileReader();reader.onload=function(){loadAISource(reader.result,file.name).then(onAILoaded).catch(onAIError);};
+    reader.onerror=function(){onAIError(new Error('文件读取失败'));};reader.readAsText(file);
+  }
+  function getBuiltInAISource(kind){
+    var src=$('sampleAISource').textContent;
+    if(kind==='50')src+='\n'+$('sampleAIWeakPatch').textContent;
+    return src;
+  }
+  function applyAdvancedSettings(){
+    boardContainer.dataset.aiPos=$('optAiPos').value;
+    var css=document.documentElement.style;
+    css.setProperty('--bubble-bg',$('optBgColor').value);
+    css.setProperty('--bubble-border',$('optBorderColor').value);
+    css.setProperty('--bubble-color',$('optFontColor').value);
+    css.setProperty('--bubble-font',FONT_MAP[$('optFont').value]||FONT_MAP.cute);
+    fxEnabled.shake=$('fxShake').checked;fxEnabled.explode=$('fxExplode').checked;
+    fxEnabled.quake=$('fxQuake').checked;fxEnabled.fire=$('fxFire').checked;
+  }
+  function startGame(){
+    if(!loadedAI)return;gameToken++;killWorker();applyAdvancedSettings();
+    board.fill(0);turn=BLACK;humanColor=selectedSide;aiColor=other(humanColor);
+    lastMove=-1;winnerLine=[];gameOver=false;aiThinking=false;
+    gameLog={startMs:Date.now(),endTime:null,durationMs:null,humanColor:humanColor,aiColor:aiColor,
+      aiName:loadedAI.name||'未命名 AI',aiVersion:loadedAI.version||'?',moves:[],result:null};
+    startScreen.classList.add('hidden');downloadLogBtn.disabled=true;logPanel.innerHTML='<div class="log-line" style="color:#8f84b5">— Jiang Qiyan · Gomoku Log —</div>';
+    clearSpeech();statusText=nextStatus();render();
+    aiSay('start',{ply:0});
+    if(turn===aiColor)scheduleAIMove();else startHumanTimer();
+  }
+  function backToStart(){
+    gameToken++;killWorker();gameOver=true;aiThinking=false;stopHumanTimer();clearSpeech();
+    startScreen.classList.remove('hidden');statusText='请选择棋子颜色与 AI 难度';render();
+  }
+  function downloadLog(){
+    if(!gameLog)return;
+    var payload={schema:'gomoku-ai-log/v1',rules:{size:15,first:'black',winLength:5,forbiddenMoves:false,boardRotation:false},
+      game:{started:new Date(gameLog.startMs).toISOString(),ended:gameLog.endTime,durationMs:gameLog.durationMs,
+        humanColor:CN[gameLog.humanColor],aiColor:CN[gameLog.aiColor],ai:gameLog.aiName,version:gameLog.aiVersion,result:gameLog.result},
+      moves:gameLog.moves};
+    var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download='gomoku-log-'+new Date().toISOString().replace(/[:.]/g,'-').slice(0,19)+'.json';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1500);
+  }
+  sideChoice.addEventListener('click',function(e){var btn=e.target.closest('[data-color]');if(!btn)return;
+    selectedSide=Number(btn.dataset.color);
+    Array.prototype.forEach.call(sideChoice.children,function(x){x.classList.toggle('active',x===btn);});
+  });
+  dropZone.addEventListener('click',function(){aiFileInput.click();});
+  aiFileInput.addEventListener('change',function(e){if(e.target.files&&e.target.files[0])handleAIFile(e.target.files[0]);aiFileInput.value='';});
+  ['dragenter','dragover'].forEach(function(event){dropZone.addEventListener(event,function(e){e.preventDefault();dropZone.classList.add('dragover');});});
+  ['dragleave','drop'].forEach(function(event){dropZone.addEventListener(event,function(e){e.preventDefault();dropZone.classList.remove('dragover');});});
+  dropZone.addEventListener('drop',function(e){var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)handleAIFile(f);});
+  builtinAiSelect.addEventListener('change',function(){
+    var kind=builtinAiSelect.value;if(!kind)return;
+    var name=kind==='50'?'江祈言-50%':'江祈言-100%';
+    setAIStatus('正在加载：'+name);
+    loadAISource(getBuiltInAISource(kind),name).then(onAILoaded).catch(onAIError);
+  });
+  downloadSampleBtn.addEventListener('click',function(){
+    var kind=builtinAiSelect.value||'100';var blob=new Blob([getBuiltInAISource(kind)],{type:'text/javascript;charset=utf-8'});
+    var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;
+    a.download='jiang-qiyan-gomoku-'+kind+'.js';document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},1500);
+  });
+  startBtn.addEventListener('click',startGame);restartBtn.addEventListener('click',backToStart);
+  downloadLogBtn.addEventListener('click',downloadLog);
+  createPixelHearts();window.addEventListener('resize',createPixelHearts);setAIEmoji('default');render();
+  // 默认预选最高档，打开网页即能开始，无需上传文件。
+  builtinAiSelect.value='100';loadAISource(getBuiltInAISource('100'),'江祈言-100%').then(onAILoaded).catch(onAIError);
+})();
+
+</script>
+</body>
+</html>
