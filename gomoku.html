@@ -1322,12 +1322,34 @@
   @media(prefers-reduced-motion:reduce){
     .mascot,.pixel-heart,.board.quake,.intersection.urgent .stone {animation:none!important;}
   }
+
+  /* v8 default stone material: celestial carved jade / lacquered obsidian. */
+  .board[data-stone-style="celestial"] .intersection .stone{width:90%;height:90%;}
+  .board[data-stone-style="celestial"] .intersection.black-stone .stone{
+   background:radial-gradient(circle at 31% 23%,#a19ad1 0%,#45406b 15%,#211c43 44%,#111127 75%,#080713 100%);
+   border:1px solid rgba(192,154,254,.44);
+   box-shadow:inset 1px 2px 3px rgba(244,218,255,.46),inset -4px -5px 9px rgba(5,2,23,.79),0 2px 3px rgba(20,11,49,.55),0 0 7px rgba(105,67,205,.24);
+  }
+  .board[data-stone-style="celestial"] .intersection.black-stone .stone::before{
+   content:"";position:absolute;inset:12%;border-radius:50%;border-top:1px solid rgba(244,210,255,.25);border-left:1px solid rgba(198,158,255,.13);pointer-events:none;
+  }
+  .board[data-stone-style="celestial"] .intersection.white-stone .stone{
+   background:radial-gradient(circle at 30% 21%,#fff 0%,#fffefd 12%,#f3eafa 35%,#d9c7ed 70%,#aa93c6 100%);
+   border:1px solid rgba(104,70,138,.62);
+   box-shadow:inset 1px 2px 3px rgba(255,255,255,.92),inset -4px -5px 8px rgba(83,53,127,.24),0 3px 5px rgba(27,12,59,.28),0 0 5px rgba(241,206,255,.29);
+  }
+  .board[data-stone-style="celestial"] .intersection.white-stone .stone::before{
+   content:"";position:absolute;inset:13%;border-radius:50%;border-top:1px solid rgba(255,255,255,.81);pointer-events:none;
+  }
+  .board[data-stone-style="celestial"] .intersection.last-place .stone::after{inset:37%;background:#ebadff;box-shadow:0 0 5px #fff,0 0 8px #b847ec;}
+  #sideChoice button:disabled{opacity:.50;cursor:not-allowed;}
+  #sideChoice button.active:disabled{opacity:1;filter:brightness(1.15);}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="board-container" id="boardContainer" data-ai-pos="topleft">
-    <div class="board" id="board" aria-label="十五路五子棋棋盘"></div>
+    <div class="board" id="board" data-stone-style="celestial" aria-label="十五路五子棋棋盘"></div>
     <div class="fire-layer" id="fireLayer"></div>
     <div class="ai-stage" id="aiStage">
       <div class="ai-bubble" id="speech"></div>
@@ -1363,19 +1385,21 @@
   <div class="dialog">
     <h2>五子棋 · 准备开局</h2>
     <p>15 × 15 棋盘，<b>黑棋先行</b>，任意方向连成五子即获胜（自由规则、无禁手）。<br>棋盘始终保持固定方向，不会随阵营旋转。</p>
-    <div class="sec-title">选择执棋颜色</div>
+    <div class="sec-title" id="sideChoiceLabel">选择执棋颜色</div>
     <div class="choice" id="sideChoice">
       <button data-color="1" class="active">● 执黑先手</button>
       <button data-color="2">○ 执白后手</button>
     </div>
-    <div class="sec-title">江祈言 · AI 强度</div>
+    <div class="sec-title">江祈言 · AI 版本</div>
     <div class="sample-row">
       <select id="builtinAiSelect" class="builtin-select">
-        <option value="100" selected>江祈言-100% · 深度战术搜索（高强度）</option>
-        <option value="50">江祈言-50% · 轻量搜索（适度削弱）</option>
+        <option value="v8" selected>v8.0 - 最强算法·强制AI执黑</option>
+        <option value="v7">v7.0 - 加强算法</option>
+        <option value="v6">v6.0 - 中等算法</option>
+        <option value="v5">v5.0 - 基础算法</option>
       </select>
     </div>
-    <div class="ai-status" id="aiStatus">正在加载江祈言-100% …</div>
+    <div class="ai-status" id="aiStatus">正在加载 v7.0…</div>
     <div class="sec-title">可选：导入自定义五子棋 AI</div>
     <div class="drop" id="dropZone">
       <input type="file" id="aiFile" accept=".js,text/javascript,application/javascript" hidden>
@@ -1391,6 +1415,7 @@
         <div class="adv-row"><label>AI 角色位置</label><select id="optAiPos">
           <option value="below">棋盘正下方</option><option value="above">棋盘正上方</option><option value="topleft" selected>棋盘左上方</option>
         </select></div>
+        <div class="adv-row"><label>棋子外观</label><select id="optStoneStyle"><option value="celestial" selected>星穹晶玉</option><option value="classic">经典紫粉</option></select></div>
         <div class="adv-row"><label>气泡背景色</label><input type="color" id="optBgColor" value="#0d0d12"></div>
         <div class="adv-row"><label>气泡边框色</label><input type="color" id="optBorderColor" value="#d946ef"></div>
         <div class="adv-row"><label>台词字体色</label><input type="color" id="optFontColor" value="#e879ff"></div>
@@ -1671,22 +1696,853 @@
 })();
 
 </script>
-<script type="text/plain" id="sampleAIWeakPatch">
+
+<script type="text/plain" id="sampleAI75Patch">
 (function(){
-  'use strict';
-  var a=window.ChessAI;
-  if(!a||typeof a.chooseMove!=='function')return;
-  a.name='江祈言-50%';a.version='5.0-gomoku-lite';a.level=50;
-  var orig=a.chooseMove;
-  a.chooseMove=function(ctx){var next=Object.assign({},ctx,{level:50});return orig(next);};
-  a.lines=Object.assign({},a.lines||{}, {
-    thinking:['唔……今天轻松一点。','大概是这里吧，我再看一眼。','这么多格子，先挑一处。'],
-    move:['试试看这步。','这次凭一点直觉。','不必每一步都那么严肃。'],
-    block:['还好我发现了这条线。','先挡一下，安全第一。'],
-    win:['欸？竟然又连成五子了。','赢啦，这局运气不错。'],
-    lose:['这局你确实下得更好。','被你连成五子了，厉害。']
-  });
+ 'use strict';
+ const ai=window.ChessAI;if(!ai)return;
+ ai.name='v5.0';ai.version='5.0';ai.level='v5.0';
+ const original=ai.chooseMove;
+ ai.chooseMove=function(ctx){const c=Object.assign({},ctx,{level:100});return original(c);};
+ ai.lines=Object.assign({},ai.lines||{}, {
+  thinking:['先算几条常见的变化。','嗯，让我推演一下这步。'],
+  lose:['这条连五没有看到。下盘再试。','不错，你抓到了我的防守漏洞。']
+ });
 })();
+
+</script>
+<script type="text/plain" id="sampleAI100Source">
+/* Jiang Qiyan · Gomoku 100% Tactical Engine v6.0
+ * 15×15 freestyle Gomoku. Pure JavaScript, browser Worker compatible.
+ * Threat-oriented negamax, iterative deepening, TT, tactical defense,
+ * VCF proof search, double-four and open-three analysis.
+ */
+(function(){
+'use strict';
+const N=15,SZ=225,DIR=[1,15,16,14],MATE=900000000,INF=1000000000;
+const Z1=new Uint32Array(675),Z2=new Uint32Array(675);
+let seed=0x7f4a7c15;function rng(){seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return seed>>>0;}
+for(let i=0;i<675;i++){Z1[i]=rng();Z2[i]=rng();}
+const segments=[];
+for(let r=0;r<15;r++)for(let c=0;c<15;c++)for(const [dr,dc] of [[0,1],[1,0],[1,1],[1,-1]]){
+ const rr=r+dr*4,cc=c+dc*4;if(rr<0||rr>=15||cc<0||cc>=15)continue;
+ segments.push([0,1,2,3,4].map(i=>(r+dr*i)*15+c+dc*i));
+}
+const centerDist=new Int8Array(SZ);for(let p=0;p<SZ;p++)centerDist[p]=Math.abs((p/15|0)-7)+Math.abs(p%15-7);
+function hash(b){let a=0,c=0;for(let p=0;p<SZ;p++)if(b[p]){a^=Z1[p*3+b[p]];c^=Z2[p*3+b[p]];}return [a>>>0,c>>>0];}
+function won(b,p,s){if(p<0)return false;let r=p/15|0,c=p%15;
+ for(const [dr,dc] of [[1,0],[0,1],[1,1],[1,-1]]){let n=1;for(const sign of [-1,1])for(let k=1;k<5;k++){let x=r+sign*k*dr,y=c+sign*k*dc;if(x<0||x>14||y<0||y>14||b[x*15+y]!==s)break;n++;}if(n>=5)return true;}
+ return false;
+}
+function wins(b,s){let w=new Uint8Array(SZ),result=[];for(const a of segments){let count=0,empty=-1,blocked=false;
+ for(let j=0;j<5;j++){let p=a[j],v=b[p];if(v===s)count++;else if(v===0)empty=p;else{blocked=true;break;}}
+ if(!blocked&&count===4&&empty>=0&&!w[empty]){w[empty]=1;result.push(empty);}}
+ return result;
+}
+function neighbors(b){let marks=new Uint8Array(SZ),filled=0;
+ for(let p=0;p<SZ;p++)if(b[p]){filled++;let r=p/15|0,c=p%15;
+ for(let dr=-2;dr<=2;dr++){let rr=r+dr;if(rr<0||rr>14)continue;
+ for(let dc=-2;dc<=2;dc++){let cc=c+dc;if(cc>=0&&cc<=14){let q=rr*15+cc;if(!b[q])marks[q]=1;}}}}
+ if(!filled)return [112];let out=[];for(let p=0;p<SZ;p++)if(marks[p])out.push(p);return out;
+}
+// Scores only shapes created through the newly placed stone; point-centered check.
+function pattern(s,pat){let idx=s.indexOf(pat);while(idx!==-1){if(idx<=4&&idx+pat.length>4)return true;idx=s.indexOf(pat,idx+1);}return false;}
+function oneOf(s,arr){for(const p of arr)if(pattern(s,p))return true;return false;}
+function features(b,p,side){if(b[p])return {score:-INF,four:0,three:0,win:false};let r=p/15|0,c=p%15;
+ b[p]=side;let sum=0,fs=0,th=0,open4=0;
+ for(const [dr,dc] of [[1,0],[0,1],[1,1],[1,-1]]){
+  let ln='';let empties=new Set();
+  for(let d=-4;d<=4;d++){let x=r+d*dr,y=c+d*dc;ln+=x<0||x>14||y<0||y>14?'#':b[x*15+y]===side?'X':b[x*15+y]===0?'.':'#';}
+  for(let st=0;st<5;st++){let block=false,k=0,at=-1;
+   for(let u=st;u<st+5;u++){if(ln[u]==='#'){block=true;break;}if(ln[u]==='X')k++;else at=u;}
+   if(!block&&k===5){b[p]=0;return {score:MATE,four:4,three:4,win:true};}
+   if(!block&&k===4&&at!==-1)empties.add(at);
+  }
+  const f=empties.size;
+  if(f>=2){open4++;fs+=2;sum+=2500000;}
+  else if(f===1){fs++;sum+=95000;}
+  else if(oneOf(ln,['.XXX.','.XX.X.','.X.XX.'])){th++;sum+=14000;}
+  else if(oneOf(ln,['.XXX','XXX.','XX.X','X.XX','.XX.X','X.XX.']))sum+=2400;
+  else if(oneOf(ln,['.XX.','.X.X.','..XX..']))sum+=560;
+  else if(oneOf(ln,['.XX','XX.','X.X']))sum+=120;
+  else if(pattern(ln,'.X.'))sum+=18;
+ }
+ b[p]=0;
+ if(fs>=2)sum+=2200000;
+ if(fs&&th)sum+=600000;
+ if(th>=2)sum+=130000;
+ sum+=Math.max(0,20-centerDist[p]);
+ return {score:sum,four:fs,three:th,open4,win:false};
+}
+function threatRank(my,opp){return my.score*1.13+opp.score*1.16;}
+function gen(b,s,width,ttMove,forced){let ownWins=wins(b,s);if(ownWins.length)return ownWins.map(p=>({p,atk:MATE,def:0,priority:MATE*5}));
+ let enemyWins=wins(b,3-s);if(enemyWins.length)return enemyWins.map(p=>({p,atk:0,def:MATE,priority:MATE*4}));
+ let cand=neighbors(b),all=[];
+ for(const p of cand){let a=features(b,p,s),d=features(b,p,3-s),priority=threatRank(a,d);
+  if(p===ttMove)priority+=100000000;
+  all.push({p,atk:a.score,def:d.score,afs:a.four,dfs:d.four,ath:a.three,dth:d.three,priority});}
+ all.sort((a,b)=>b.priority-a.priority);
+ if(!all.length)return all;
+ // Must examine forcing fours even if ranked beyond ordinary width.
+ let must=all.filter(m=>m.atk>=90000||m.def>=90000),picked=all.slice(0,width);
+ for(const m of must)if(!picked.some(x=>x.p===m.p))picked.push(m);
+ picked.sort((a,b)=>b.priority-a.priority);
+ return picked.slice(0,width+4);
+}
+let deadline=0,nodes=0,aborted=false,tt=new Map(),killer=new Int16Array(40),history=new Float64Array(SZ),maxNodes=1000000;
+function timeout(){if((nodes&127)===0&&(Date.now()>=deadline||nodes>=maxNodes))aborted=true;return aborted;}
+function evalPos(b,s){ // Comparison of both sides' strongest local formations and secondary threats.
+ const nearby=neighbors(b);let a=0,best2=0,d=0,opp2=0;
+ for(const p of nearby){let f=features(b,p,s).score,g=features(b,p,3-s).score;
+  if(f>a){best2=a;a=f;}else if(f>best2)best2=f;
+  if(g>d){opp2=d;d=g;}else if(g>opp2)opp2=g;}
+ return Math.max(-MATE/3,Math.min(MATE/3,a*1.10+best2*.18-d*1.16-opp2*.2));
+}
+function search(b,s,depth,alpha,beta,last,h1,h2,ply){nodes++;if(timeout())return 0;
+ if(last>=0&&won(b,last,3-s))return -MATE+ply;
+ const iw=wins(b,s);if(iw.length)return MATE-ply-1;
+ const ow=wins(b,3-s);if(ow.length>=2)return -MATE+ply+2;
+ if(depth<=0&&ow.length===0)return evalPos(b,s);
+ // If opponent has one win, defense is forced; search at least one ply.
+ if(depth<=0)depth=1;
+ const key=h1+':'+h2+':'+s;let entry=tt.get(key),origA=alpha;
+ if(entry&&entry.depth>=depth){if(entry.flag===0)return entry.score;
+  if(entry.flag===1)alpha=Math.max(alpha,entry.score);
+  if(entry.flag===2)beta=Math.min(beta,entry.score);
+  if(alpha>=beta)return entry.score;}
+ let width=depth>=8?7:depth>=6?8:depth>=4?10:depth>=2?11:13;
+ let moves=gen(b,s,width,entry?entry.best:-1,ow.length);
+ if(!moves.length)return 0;
+ if(!entry)for(let m of moves)m.priority+=history[m.p];
+ moves.sort((a,b)=>b.priority-a.priority);
+ let best=-INF,choice=moves[0].p;
+ for(let j=0;j<moves.length;j++){
+  let m=moves[j],p=m.p,v,ii=p*3+s; b[p]=s;
+  if(m.atk>=MATE||won(b,p,s))v=MATE-ply-1;
+  else {let d=depth-1;
+   if(j>=5&&depth>=5&&m.atk<3000&&m.def<3000)d--;
+   v=-search(b,3-s,d,-beta,-alpha,p,(h1^Z1[ii])>>>0,(h2^Z2[ii])>>>0,ply+1);
+   if(!aborted&&d<depth-1&&v>alpha)v=-search(b,3-s,depth-1,-beta,-alpha,p,(h1^Z1[ii])>>>0,(h2^Z2[ii])>>>0,ply+1);
+  }
+  b[p]=0;if(aborted)return 0;
+  if(v>best){best=v;choice=p;}
+  if(v>alpha)alpha=v;
+  if(alpha>=beta){history[p]=Math.min(100000,history[p]+depth*depth*3);break;}
+ }
+ if(tt.size>110000)tt.clear();
+ tt.set(key,{best:choice,depth,score:best,flag:best<=origA?2:best>=beta?1:0});return best;
+}
+// A conservative VCF solver. A claimed win is backed by forced single-point responses.
+// This never counts a mere open three as a proven forcing win.
+let proofNodes=0,proofLimit=2400;
+function vcf(b,attacker,depth,seen){proofNodes++;if(proofNodes>proofLimit||Date.now()>=deadline-350)return false;
+ if(wins(b,3-attacker).length)return false; // defender has immediate winning reply
+ let imm=wins(b,attacker);if(imm.length)return true;
+ if(depth<=0)return false;
+ let options=gen(b,attacker,13,-1).filter(m=>m.atk>=90000).slice(0,11);
+ for(const m of options){let p=m.p;b[p]=attacker;
+  let enemy=wins(b,3-attacker),my=wins(b,attacker),ok=false;
+  if(!enemy.length){
+   if(my.length>=2)ok=true;
+   else if(my.length===1){let block=my[0];b[block]=3-attacker;
+    ok=vcf(b,attacker,depth-1,seen);b[block]=0;
+   }
+  }
+  b[p]=0;if(ok)return true;
+ }
+ return false;
+}
+function vcfMoves(b,side,candidates,depth){let proven=[];
+ for(const m of candidates.slice(0,16)){
+  if(Date.now()>deadline-450||proofNodes>proofLimit)break;
+  b[m.p]=side;
+  let oppWins=wins(b,3-side),myWins=wins(b,side);
+  let ok=false;
+  if(!oppWins.length){if(myWins.length>=2)ok=true;
+   else if(myWins.length===1){let p=myWins[0];b[p]=3-side;ok=vcf(b,side,depth-1);b[p]=0;}}
+  b[m.p]=0;if(ok)proven.push(m);
+ }
+ return proven;
+}
+function chooseMove(ctx){const b=new Uint8Array(SZ);
+ for(let r=0;r<15;r++)for(let c=0;c<15;c++){let q=ctx.board&&ctx.board[r]&&ctx.board[r][c];b[r*15+c]=q===1||q===2?q:0;}
+ const side=ctx.color===2?2:1,begin=Date.now();deadline=begin+5700;nodes=0;aborted=false;proofNodes=0;
+ history.fill(0);tt.clear();maxNodes=130000;
+ const myWin=wins(b,side);if(myWin.length)return answer(myWin[0],'立即成五',0,0,begin,MATE);
+ const enemyWin=wins(b,3-side);if(enemyWin.length){let defense=enemyWin[0];return answer(defense,enemyWin.length>1?'双杀局面 · 优先阻挡':'必防点精准拦截',0,0,begin,-MATE);}
+ const occupied=b.reduce((n,x)=>n+(x?1:0),0);if(!occupied)return answer(112,'中心开局',0,0,begin,0);
+ // Fast tactical check: find proven forced victory (continuous fours).
+ let root=gen(b,side,19,-1);let best=root[0].p,score=0,completed=0,proof='';
+ proofLimit=1900;const killers=vcfMoves(b,side,root,5);
+ if(killers.length){killers.sort((a,b)=>b.atk-a.atk);return answer(killers[0].p,'VCF 连续冲四必胜验证',0,proofNodes,begin,MATE-100);}
+ // Safety ordering: avoid one-ply unavoidable double threats, prioritize preemptive defense.
+ for(const m of root){
+  b[m.p]=side;
+  const ownResponse=wins(b,side),ow=wins(b,3-side);
+  // Even before the full search, reject moves permitting a direct forced win
+  // or an opponent's next-move open four / double-four when we have no counter-win.
+  let fork=false;
+  if(!ownResponse.length&&!ow.length){
+   const replies=gen(b,3-side,12,-1);
+   fork=replies.some(z=>z.atk>=2200000);
+  }
+  m.unsafe=ow.length>=2||(ow.length===1&&ownResponse.length===0)||fork;
+  b[m.p]=0;
+ }
+ const allSafe=root.filter(m=>!m.unsafe);const safeSet=new Set(allSafe.map(m=>m.p));if(allSafe.length){root=allSafe;best=root[0].p;}
+ const hs=hash(b);
+ for(let depth=1;depth<=11;depth++){
+  if(Date.now()>=deadline-100)break;
+  let ordered=gen(b,side,depth>=7?11:depth>=4?13:17,best);
+  if(allSafe.length)ordered=ordered.filter(m=>safeSet.has(m.p));
+  if(!ordered.length)ordered=root.slice(0,1);
+  for(const m of ordered)if(m.p===best)m.priority+=200000000;
+  ordered.sort((a,b)=>b.priority-a.priority);
+  let localBest=ordered[0].p,localScore=-INF,alpha=-INF;
+  for(let i=0;i<ordered.length;i++){
+   const m=ordered[i],p=m.p,ii=p*3+side;b[p]=side;
+   let v=m.atk>=MATE?MATE-1:-search(b,3-side,depth-1,-INF,-alpha,p,(hs[0]^Z1[ii])>>>0,(hs[1]^Z2[ii])>>>0,1);
+   b[p]=0;if(aborted)break;
+   if(v>localScore){localScore=v;localBest=p;}
+   if(v>alpha)alpha=v;
+  }
+  if(aborted)break;
+  best=localBest;score=localScore;completed=depth;
+  if(score>=MATE-1000)break;
+ }
+ return answer(best,'增强战术评估 + VCF + Alpha-Beta/置换表',completed,nodes+proofNodes,begin,score);
+}
+function answer(p,method,depth,nodes,begin,score){return {row:p/15|0,col:p%15,debug:{algorithm:method,depth,nodes,timeMs:Date.now()-begin,score:Math.round(score)}};}
+const LINES={
+ start:['这一次，我会把每一条潜在的杀棋都算进去。','棋盘不变，规则不变。这一局认真下。','落子开始，先看棋形。'],
+ thinking:['我要先检查冲四、活三和反击的次序。','这一手，得把后面的强制应对算清楚。','别急，正在查算连续威胁。','我再验证一下防点。'],
+ sleeping:['轮到你了，我先看一眼其他棋形。','你的下一手，会落在哪里？'],
+ move:['棋子落在这里。','这次我换一条进攻路线。','这手背后还有后续。'],
+ afterOpponentMove:['看到了。你的威胁，我会重新计算。','这手不错，得认真回应。','在这里转向进攻？'],
+ block:['这次先堵住真正的危险点。','四连与活三，我都在留意。','不能只防眼前这一手。'],
+ threat:['该你解这一手威胁了。','这条线还有续招。','冲四只是开始。'],
+ win:['五子成线。这次是我赢了。','杀棋成立。下次换你先试试？'],
+ lose:['这局你找到了我的漏洞。我会记住这盘棋。','又被你连成五子了。精彩的一手。'],
+ draw:['棋盘下满，平局。']
+};
+window.ChessAI={name:'v6.0',version:'6.0',level:'v6.0',lines:LINES,emojis:null,chooseMove};
+})();
+
+</script>
+<script type="text/plain" id="sampleAIV8Source">
+/* Jiang Qiyan Gomoku v8.0 — offline black-first threat engine.
+ * Freestyle 15x15, no forbidden moves. All computations are local.
+ */
+(function(){
+'use strict';
+const N=15,SZ=225,DIR=[[1,0],[0,1],[1,1],[1,-1]],MATE=900000000,INF=1000000000;
+const areas=Array.from({length:SZ},()=>[]),rays=Array.from({length:SZ},()=>[]),center=new Int8Array(SZ);
+for(let p=0;p<SZ;p++){
+ const r=(p/15)|0,c=p%15;center[p]=Math.abs(r-7)+Math.abs(c-7);
+ for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++){
+  const rr=r+dr,cc=c+dc;if(rr>=0&&rr<15&&cc>=0&&cc<15)areas[p].push(rr*15+cc);
+ }
+ const set=new Set([p]);for(const [dr,dc] of DIR)for(let d=-4;d<=4;d++){
+  const rr=r+d*dr,cc=c+d*dc;if(rr>=0&&rr<15&&cc>=0&&cc<15)set.add(rr*15+cc);
+ }rays[p]=Array.from(set);
+}
+const segments=[];
+for(let r=0;r<15;r++)for(let c=0;c<15;c++)for(const [dr,dc] of DIR){
+ if(r+dr*4<0||r+dr*4>=15||c+dc*4<0||c+dc*4>=15)continue;
+ segments.push(Array.from({length:5},(_,k)=>(r+dr*k)*15+c+dc*k));
+}
+const zob=new Uint32Array(SZ*3),zob2=new Uint32Array(SZ*3);let rngseed=0x6d4e8b29;
+function rng(){rngseed^=rngseed<<13;rngseed^=rngseed>>>17;rngseed^=rngseed<<5;return rngseed>>>0;}
+for(let i=0;i<zob.length;i++){zob[i]=rng();zob2[i]=rng();}
+let b,near,stamp,cache,seen,hash1,hash2,tt,history,deadline,nodes,proofNodes,proofDeadline,stopFlag,rootPly;
+function initialize(board){
+ b=new Uint8Array(SZ);near=new Uint8Array(SZ);stamp=new Uint32Array(SZ);stamp.fill(1);
+ cache=[null,Array(SZ),Array(SZ)];seen=[null,new Uint32Array(SZ),new Uint32Array(SZ)];
+ history=new Float64Array(SZ);tt=new Map();hash1=0;hash2=0;
+ for(let i=0;i<SZ;i++)if(board[i]){b[i]=board[i];const k=i*3+b[i];hash1^=zob[k];hash2^=zob2[k];for(const p of areas[i])near[p]++;}
+ nodes=0;proofNodes=0;stopFlag=false;
+}
+function make(p,side){b[p]=side;let k=p*3+side;hash1^=zob[k];hash2^=zob2[k];for(const q of areas[p])near[q]++;for(const q of rays[p])stamp[q]++;}
+function undo(p,side){b[p]=0;let k=p*3+side;hash1^=zob[k];hash2^=zob2[k];for(const q of areas[p])near[q]--;for(const q of rays[p])stamp[q]++;}
+function tick(){if((nodes&63)===0&&Date.now()>=deadline)stopFlag=true;return stopFlag;}
+function hasWon(p,side){const r=p/15|0,c=p%15;
+ for(const [dr,dc] of DIR){let count=1;
+  for(const sign of [-1,1])for(let d=1;d<=4;d++){
+   const rr=r+sign*d*dr,cc=c+sign*d*dc;if(rr<0||rr>=15||cc<0||cc>=15||b[rr*15+cc]!==side)break;count++;
+  }if(count>=5)return true;
+ }return false;}
+function matchCore(line,patterns){
+ for(const pat of patterns){let ix=line.indexOf(pat);
+  while(ix>=0){if(ix<=4&&ix+pat.length>4)return true;ix=line.indexOf(pat,ix+1);}
+ }return false;
+}
+function point(p,s){
+ if(b[p])return null;
+ if(seen[s][p]===stamp[p])return cache[s][p];
+ const r=p/15|0,c=p%15;let score=0,four=0,three=0,liveFour=0,twos=0,win=false;
+ b[p]=s;
+ for(const [dr,dc] of DIR){
+  let line='';for(let d=-4;d<=4;d++){
+   let rr=r+d*dr,cc=c+d*dc;line+=rr<0||rr>=15||cc<0||cc>=15?'#':b[rr*15+cc]===s?'X':b[rr*15+cc]===0?'.':'#';
+  }
+  let endings=0,winMask=0;
+  for(let st=0;st<=4;st++){
+   let n=0,emp=-1,blocked=false;
+   for(let j=st;j<st+5;j++)if(line[j]==='#'){blocked=true;break;}else if(line[j]==='X')n++;else emp=j;
+   if(blocked)continue;
+   if(n===5){win=true;break;}
+   if(n===4&&emp>=0)winMask|=1<<emp;
+  }
+  if(win)break;
+  endings=0;for(let i=0;i<9;i++)if(winMask&(1<<i))endings++;
+  if(endings>=2){four+=2;liveFour++;score+=36000000;}
+  else if(endings===1){four++;score+=1700000;}
+  else if(matchCore(line,['.XXX.','.XX.X.','.X.XX.'])) {three++;score+=82000;}
+  else if(matchCore(line,['.XXX','XXX.','.XX.X','X.XX.'])) score+=21000;
+  else if(matchCore(line,['.XX.','.X.X.','.X.X','X.X.'])){twos++;score+=3700;}
+  else if(matchCore(line,['.XX','XX.','X.X']))score+=460;
+  else if(matchCore(line,['.X.']))score+=24;
+ }
+ b[p]=0;
+ if(win)score=MATE;
+ else {if(four>=2)score+=95000000;if(four&&three)score+=4200000;if(three>=2)score+=1800000;
+       if(three>=3)score+=2000000;if(twos>=2)score+=2000;score+=Math.max(0,18-center[p])*12;}
+ let v={score,four,three,liveFour,win};cache[s][p]=v;seen[s][p]=stamp[p];return v;
+}
+function candidates(){let out=[];for(let p=0;p<SZ;p++)if(!b[p]&&near[p]>0)out.push(p);return out.length?out:[112];}
+function winningCells(side){let list=[];for(let p=0;p<SZ;p++)if(!b[p]&&near[p]&&point(p,side).win)list.push(p);return list;}
+function moves(side,width,ttMove=-1){
+ const mine=winningCells(side);if(mine.length)return mine.map(p=>({p,priority:MATE*5,at:MATE,df:0}));
+ const theirs=winningCells(3-side);if(theirs.length)return theirs.map(p=>({p,priority:MATE*4,at:0,df:MATE}));
+ let ret=[];
+ for(const p of candidates()){
+  const a=point(p,side),d=point(p,3-side);
+  const pr=a.score*1.05+d.score*1.13+history[p]+(p===ttMove?100000000:0);
+  ret.push({p,priority:pr,at:a.score,df:d.score,af:a.four,dt:d.three,dfour:d.four});
+ }
+ ret.sort((x,y)=>y.priority-x.priority);
+ if(width&&ret.length>width){
+  const selection=ret.slice(0,width),set=new Set(selection.map(m=>m.p));
+  // Never prune out a forcing four, fork or a high-priority defensive point.
+  for(const m of ret)if(m.af||m.dfour||m.at>=1800000||m.df>=1800000){if(!set.has(m.p)){selection.push(m);set.add(m.p);}}
+  selection.sort((x,y)=>y.priority-x.priority);return selection.slice(0,width+7);
+ }
+ return ret;
+}
+function quickEval(side){
+ let a=0,a2=0,e=0,e2=0;
+ for(const p of candidates()){
+  let x=point(p,side).score,y=point(p,3-side).score;
+  if(x>a){a2=a;a=x;}else if(x>a2)a2=x;
+  if(y>e){e2=e;e=y;}else if(y>e2)e2=y;
+ }
+ let s=a*1.05+a2*.16-e*1.16-e2*.20;
+ return Math.max(-MATE/2,Math.min(MATE/2,s));
+}
+function search(side,depth,alpha,beta,last,ply,ext){
+ nodes++;if(tick())return 0;
+ if(last>=0&&hasWon(last,3-side))return -MATE+ply;
+ const own=winningCells(side);if(own.length)return MATE-ply-1;
+ const opp=winningCells(3-side);if(opp.length>=2)return -MATE+ply+2;
+ if(depth<=0){
+  // Only extend tactical replies when a direct winning move must be parried.
+  if(!opp.length||ext>=2||ply>=16)return quickEval(side);
+  depth=1;ext++;
+ }
+ const key=hash1+':'+hash2+':'+side,entry=tt.get(key),a0=alpha,b0=beta;
+ if(entry&&entry.depth>=depth){if(entry.flag===0)return entry.score;
+  if(entry.flag===1)alpha=Math.max(alpha,entry.score);
+  if(entry.flag===2)beta=Math.min(beta,entry.score);
+  if(alpha>=beta)return entry.score;
+ }
+ const width=depth>=8?7:depth>=6?9:depth>=4?11:depth>=2?13:15;
+ let ordered=moves(side,width,entry?entry.best:-1);
+ if(!ordered.length)return 0;
+ let best=-INF,bestP=ordered[0].p;
+ for(let j=0;j<ordered.length;j++){
+  const m=ordered[j],p=m.p;make(p,side);let val;
+  if(hasWon(p,side))val=MATE-ply-1;
+  else {
+   let reduction=j>=8&&depth>=5&&m.at<20000&&m.df<20000?1:0;
+   if(j===0)val=-search(3-side,depth-1-reduction,-beta,-alpha,p,ply+1,ext);
+   else {
+    val=-search(3-side,depth-1-reduction,-alpha-1,-alpha,p,ply+1,ext);
+    if(!stopFlag&&val>alpha&&val<beta)val=-search(3-side,depth-1,-beta,-alpha,p,ply+1,ext);
+   }
+  }
+  undo(p,side);if(stopFlag)return 0;
+  if(val>best){best=val;bestP=p;}if(val>alpha)alpha=val;
+  if(alpha>=beta){history[p]=Math.min(10000000,history[p]+depth*depth*17);break;}
+ }
+ if(tt.size>=85000)tt.clear();
+ tt.set(key,{best:bestP,depth,score:best,flag:best<=a0?2:best>=b0?1:0});
+ return best;
+}
+// Proven VCF: every attack leaves an immediate winning cell, forcing a single block.
+// Failing/unfinished proof searches never count as proven wins.
+function proveVCF(attacker,remaining){
+ if(++proofNodes>12000||Date.now()>proofDeadline)return false;
+ if(winningCells(3-attacker).length)return false;
+ if(winningCells(attacker).length)return true;
+ if(remaining<=0)return false;
+ const ordered=moves(attacker,13).filter(x=>x.af||x.at>=1700000).slice(0,13);
+ for(const m of ordered){
+  make(m.p,attacker);const enem=winningCells(3-attacker),ours=winningCells(attacker);
+  let ok=false;
+  if(!enem.length){if(ours.length>=2)ok=true;
+   else if(ours.length===1){const block=ours[0];make(block,3-attacker);
+    ok=proveVCF(attacker,remaining-1);undo(block,3-attacker);
+   }
+  }
+  undo(m.p,attacker);
+  if(ok)return true;
+ }
+ return false;
+}
+function findVCF(side,ordered){
+ for(const move of ordered.slice(0,15)){
+  if(Date.now()>=proofDeadline||proofNodes>=12000)break;
+  make(move.p,side);let adversary=winningCells(3-side),mine=winningCells(side),ok=false;
+  if(!adversary.length){if(mine.length>=2)ok=true;
+   else if(mine.length===1){const p=mine[0];make(p,3-side);
+    ok=proveVCF(side,10);undo(p,3-side);
+   }
+  }
+  undo(move.p,side);
+  if(ok)return move.p;
+ }
+ return -1;
+}
+// Threat map: for each empty intersection, test whether giving it to white
+// creates an unstoppable pair of distinct winning cells. Root candidates that
+// allow a white fork are deprioritized unless black has an immediate counter-win.
+function enemyForkThreats(opp,cap=12){let out=[];
+ for(const m of moves(opp,20)){
+  if(m.at<1800000&&!(m.af>=2))continue;
+  make(m.p,opp);
+  let me=winningCells(3-opp),enemy=winningCells(opp);
+  undo(m.p,opp);
+  if(!me.length&&enemy.length>=2){out.push(m.p);if(out.length>=cap)break;}
+ }
+ return out;
+}
+function rootSafety(side,move){
+ make(move.p,side);
+ const me=winningCells(side),opp=winningCells(3-side);let penalty=0;
+ if(me.length>=2&&!opp.length){undo(move.p,side);return -MATE/2;}
+ if(opp.length>=2)penalty=MATE/2;
+ else if(opp.length===1&&!me.length)penalty=36000000;
+ else if(!me.length){
+  // Explicit one-ply opponent double-four check, not a static pattern guess.
+  const forks=enemyForkThreats(3-side,2);if(forks.length)penalty=4000000+forks.length*1500000;
+ }
+ undo(move.p,side);return penalty;
+}
+function ans(p,depth,begin,score,tag){return {row:(p/15)|0,col:p%15,debug:{algorithm:'v8.0'+(tag?'/'+tag:''),depth,nodes:nodes+proofNodes,timeMs:Date.now()-begin,score:Math.round(score)}};}
+function chooseMove(ctx){
+ const raw=new Uint8Array(SZ);for(let r=0;r<15;r++)for(let c=0;c<15;c++)raw[r*15+c]=Number(ctx.board?.[r]?.[c])||0;
+ const side=ctx.color===2?2:1,begin=Date.now();
+ let time=Math.max(120,Math.min(14200,Number(ctx.timeLimitMs)||14200));deadline=begin+time;proofDeadline=begin+Math.min(2300,Math.floor(time*.17));rootPly=ctx.ply||0;
+ initialize(raw);
+ const immediate=winningCells(side);if(immediate.length)return ans(immediate[0],0,begin,MATE,'win');
+ const danger=winningCells(3-side);if(danger.length){
+  let best=danger[0],bestValue=-INF;for(const p of danger){let v=point(p,side).score;if(v>bestValue){bestValue=v;best=p;}}
+  return ans(best,0,begin,-MATE,'block');
+ }
+ let occupied=0;for(const v of b)if(v)occupied++;
+ if(!occupied)return ans(112,0,begin,0,'opening');
+ let ordered=moves(side,24);if(!ordered.length)return ans(112,0,begin,0,'none');
+ // Opening: preserve strong central development in the absence of forced tactics.
+ let best=ordered[0].p,depthDone=0,score=0;
+ let threat=enemyForkThreats(3-side,10),threatSet=new Set(threat);
+ if(threat.length){for(let m of ordered)if(threatSet.has(m.p))m.priority+=4000000;ordered.sort((a,b)=>b.priority-a.priority);best=ordered[0].p;}
+ const proved=findVCF(side,ordered);
+ if(proved>=0)return ans(proved,11,begin,MATE-3,'vcf');
+ // Defense evaluation on a bounded initial root set; no unbounded root penalties.
+ let analyzed=[];
+ for(const m of ordered){
+  if(Date.now()>=deadline-240)break;
+  m.danger=rootSafety(side,m);
+  analyzed.push(m);
+ }
+ if(!analyzed.length)return ans(best,0,begin,score,'time');
+ ordered=analyzed;
+ ordered.sort((x,y)=>(x.danger||0)-(y.danger||0)||y.priority-x.priority);
+ best=ordered[0].p;
+ const minDanger=ordered[0].danger||0;
+ const restricted=ordered.filter(m=>(m.danger||0)<=minDanger+1800000);
+ const safe=new Set((restricted.length>=2?restricted:ordered.slice(0,3)).map(m=>m.p));
+ // Iterative deepening: only completed full iterations may replace the move.
+ for(let dep=1;dep<=14;dep++){
+  if(Date.now()>=deadline-180)break;
+  let line=moves(side,dep>=8?11:dep>=5?15:19,best).filter(m=>safe.has(m.p));
+  if(!line.length)line=ordered.slice(0,Math.min(4,ordered.length));
+  line.sort((x,y)=>(y.p===best?350000000:0)+y.priority-((x.p===best?350000000:0)+x.priority));
+  let top=-INF,chosen=line[0].p,alpha=-INF;
+  for(const m of line){
+   make(m.p,side);
+   let val=hasWon(m.p,side)?MATE-1:-search(3-side,dep-1,-INF,-alpha,m.p,1,0);
+   undo(m.p,side);
+   if(stopFlag)break;
+   if(val>top){top=val;chosen=m.p;}alpha=Math.max(alpha,val);
+  }
+  if(stopFlag)break;
+  best=chosen;score=top;depthDone=dep;
+  if(score>=MATE-1000)break;
+ }
+ return ans(best,depthDone,begin,score,depthDone?'search':'safety');
+}
+const LINES={
+ start:['黑方先行。现在由我落下第一子。','这一局，我执黑。棋局开始。','天元起手，接下来轮到你。'],
+ thinking:['我在逐点核查攻防与下一轮威胁。','这一步，先验算是否存在必应之手。','我再深入推演几层棋路。'],
+ sleeping:['白棋该你了。','我会等你落子。'],
+ move:['这一子，落定。','轮到你了。','棋势正在发生变化。'],
+ afterOpponentMove:['这一手我记下了。','你的选择，我会继续演算。'],
+ block:['先切断这条线。','这个防点不能让给你。'],
+ threat:['这一步是攻势的起点。','看看你怎么应对。'],
+ win:['五子连珠，黑方获胜。','胜负已定，这一局是我赢了。'],
+ lose:['这局是你赢了。再来一盘。','黑棋这一手确实算漏了。'],
+ draw:['平局。棋盘已满。']
+};
+window.ChessAI={name:'v8.0',version:'8.0',level:'v8.0',forceBlack:true,lines:LINES,emojis:null,chooseMove};
+})();
+</script>
+<script type="text/plain" id="sampleAIV7Source">
+
+/* Jiang Qiyan · Gomoku v7.0 Tactical-Proof Engine
+ * 15×15 freestyle Gomoku. Pure JavaScript, browser Worker compatible.
+ * Threat-oriented negamax, iterative deepening, TT, tactical defense,
+ * VCF proof search, double-four and open-three analysis.
+ */
+(function(){
+'use strict';
+const N=15,SZ=225,DIR=[1,15,16,14],MATE=900000000,INF=1000000000;
+const Z1=new Uint32Array(675),Z2=new Uint32Array(675);
+let seed=0x7f4a7c15;function rng(){seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return seed>>>0;}
+for(let i=0;i<675;i++){Z1[i]=rng();Z2[i]=rng();}
+const segments=[];
+for(let r=0;r<15;r++)for(let c=0;c<15;c++)for(const [dr,dc] of [[0,1],[1,0],[1,1],[1,-1]]){
+ const rr=r+dr*4,cc=c+dc*4;if(rr<0||rr>=15||cc<0||cc>=15)continue;
+ segments.push([0,1,2,3,4].map(i=>(r+dr*i)*15+c+dc*i));
+}
+const centerDist=new Int8Array(SZ);for(let p=0;p<SZ;p++)centerDist[p]=Math.abs((p/15|0)-7)+Math.abs(p%15-7);
+function hash(b){let a=0,c=0;for(let p=0;p<SZ;p++)if(b[p]){a^=Z1[p*3+b[p]];c^=Z2[p*3+b[p]];}return [a>>>0,c>>>0];}
+function won(b,p,s){if(p<0)return false;let r=p/15|0,c=p%15;
+ for(const [dr,dc] of [[1,0],[0,1],[1,1],[1,-1]]){let n=1;for(const sign of [-1,1])for(let k=1;k<5;k++){let x=r+sign*k*dr,y=c+sign*k*dc;if(x<0||x>14||y<0||y>14||b[x*15+y]!==s)break;n++;}if(n>=5)return true;}
+ return false;
+}
+function wins(b,s){let w=new Uint8Array(SZ),result=[];for(const a of segments){let count=0,empty=-1,blocked=false;
+ for(let j=0;j<5;j++){let p=a[j],v=b[p];if(v===s)count++;else if(v===0)empty=p;else{blocked=true;break;}}
+ if(!blocked&&count===4&&empty>=0&&!w[empty]){w[empty]=1;result.push(empty);}}
+ return result;
+}
+function neighbors(b){let marks=new Uint8Array(SZ),filled=0;
+ for(let p=0;p<SZ;p++)if(b[p]){filled++;let r=p/15|0,c=p%15;
+ for(let dr=-2;dr<=2;dr++){let rr=r+dr;if(rr<0||rr>14)continue;
+ for(let dc=-2;dc<=2;dc++){let cc=c+dc;if(cc>=0&&cc<=14){let q=rr*15+cc;if(!b[q])marks[q]=1;}}}}
+ if(!filled)return [112];let out=[];for(let p=0;p<SZ;p++)if(marks[p])out.push(p);return out;
+}
+// Scores only shapes created through the newly placed stone; point-centered check.
+function pattern(s,pat){let idx=s.indexOf(pat);while(idx!==-1){if(idx<=4&&idx+pat.length>4)return true;idx=s.indexOf(pat,idx+1);}return false;}
+function oneOf(s,arr){for(const p of arr)if(pattern(s,p))return true;return false;}
+function features(b,p,side){if(b[p])return {score:-INF,four:0,three:0,win:false};let r=p/15|0,c=p%15;
+ b[p]=side;let sum=0,fs=0,th=0,open4=0;
+ for(const [dr,dc] of [[1,0],[0,1],[1,1],[1,-1]]){
+  let ln='';let empties=new Set();
+  for(let d=-4;d<=4;d++){let x=r+d*dr,y=c+d*dc;ln+=x<0||x>14||y<0||y>14?'#':b[x*15+y]===side?'X':b[x*15+y]===0?'.':'#';}
+  for(let st=0;st<5;st++){let block=false,k=0,at=-1;
+   for(let u=st;u<st+5;u++){if(ln[u]==='#'){block=true;break;}if(ln[u]==='X')k++;else at=u;}
+   if(!block&&k===5){b[p]=0;return {score:MATE,four:4,three:4,win:true};}
+   if(!block&&k===4&&at!==-1)empties.add(at);
+  }
+  const f=empties.size;
+  if(f>=2){open4++;fs+=2;sum+=2500000;}
+  else if(f===1){fs++;sum+=95000;}
+  else if(oneOf(ln,['.XXX.','.XX.X.','.X.XX.'])){th++;sum+=14000;}
+  else if(oneOf(ln,['.XXX','XXX.','XX.X','X.XX','.XX.X','X.XX.']))sum+=2400;
+  else if(oneOf(ln,['.XX.','.X.X.','..XX..']))sum+=560;
+  else if(oneOf(ln,['.XX','XX.','X.X']))sum+=120;
+  else if(pattern(ln,'.X.'))sum+=18;
+ }
+ b[p]=0;
+ if(fs>=2)sum+=2200000;
+ if(fs&&th)sum+=600000;
+ if(th>=2)sum+=130000;
+ sum+=Math.max(0,20-centerDist[p]);
+ return {score:sum,four:fs,three:th,open4,win:false};
+}
+function threatRank(my,opp){return my.score*1.13+opp.score*1.16;}
+function gen(b,s,width,ttMove,forced){let ownWins=wins(b,s);if(ownWins.length)return ownWins.map(p=>({p,atk:MATE,def:0,priority:MATE*5}));
+ let enemyWins=wins(b,3-s);if(enemyWins.length)return enemyWins.map(p=>({p,atk:0,def:MATE,priority:MATE*4}));
+ let cand=neighbors(b),all=[];
+ for(const p of cand){let a=features(b,p,s),d=features(b,p,3-s),priority=threatRank(a,d);
+  if(p===ttMove)priority+=100000000;
+  all.push({p,atk:a.score,def:d.score,afs:a.four,dfs:d.four,ath:a.three,dth:d.three,priority});}
+ all.sort((a,b)=>b.priority-a.priority);
+ if(!all.length)return all;
+ // Must examine forcing fours even if ranked beyond ordinary width.
+ let must=all.filter(m=>m.atk>=90000||m.def>=90000),picked=all.slice(0,width);
+ for(const m of must)if(!picked.some(x=>x.p===m.p))picked.push(m);
+ picked.sort((a,b)=>b.priority-a.priority);
+ return picked.slice(0,width+4);
+}
+let deadline=0,nodes=0,aborted=false,tt=new Map(),killer=new Int16Array(40),history=new Float64Array(SZ),maxNodes=1000000;
+function timeout(){if((nodes&31)===0&&(Date.now()>=deadline||nodes>=maxNodes))aborted=true;return aborted;}
+function evalPos(b,s){ // Comparison of both sides' strongest local formations and secondary threats.
+ const nearby=neighbors(b);let a=0,best2=0,d=0,opp2=0;
+ for(const p of nearby){let f=features(b,p,s).score,g=features(b,p,3-s).score;
+  if(f>a){best2=a;a=f;}else if(f>best2)best2=f;
+  if(g>d){opp2=d;d=g;}else if(g>opp2)opp2=g;}
+ return Math.max(-MATE/3,Math.min(MATE/3,a*1.10+best2*.18-d*1.16-opp2*.2));
+}
+function search(b,s,depth,alpha,beta,last,h1,h2,ply){nodes++;if(timeout())return 0;
+ if(ply>=17)return evalPos(b,s);
+ if(last>=0&&won(b,last,3-s))return -MATE+ply;
+ const iw=wins(b,s);if(iw.length)return MATE-ply-1;
+ const ow=wins(b,3-s);if(ow.length>=2)return -MATE+ply+2;
+ if(depth<=0&&ow.length===0){
+  // A quiet leaf is only safe after considering a possible double-four next ply.
+  // In particular an open-four by the next player creates two distinct winning cells.
+  let they=criticalForks(b,3-s,3);if(they.length){
+    let ours=criticalForks(b,s,2);
+    if(!ours.length)return -MATE/5-ply;
+  }
+  return evalPos(b,s);
+ }
+ // If opponent has one win, defense is forced; search at least one ply.
+ if(depth<=0){
+  // Limited threat extension; never allow unbounded quiescence on alternating fours.
+  if(ply>=11)return evalPos(b,s)-Math.min(ow.length,1)*350000;
+  depth=1;
+ }
+ const key=h1+':'+h2+':'+s;let entry=tt.get(key),origA=alpha;
+ if(entry&&entry.depth>=depth){if(entry.flag===0)return entry.score;
+  if(entry.flag===1)alpha=Math.max(alpha,entry.score);
+  if(entry.flag===2)beta=Math.min(beta,entry.score);
+  if(alpha>=beta)return entry.score;}
+ let width=depth>=9?8:depth>=7?9:depth>=5?11:depth>=3?13:15;
+ let moves=gen(b,s,width,entry?entry.best:-1,ow.length);
+ if(!moves.length)return 0;
+ if(!entry)for(let m of moves)m.priority+=history[m.p];
+ moves.sort((a,b)=>b.priority-a.priority);
+ let best=-INF,choice=moves[0].p;
+ for(let j=0;j<moves.length;j++){
+  let m=moves[j],p=m.p,v,ii=p*3+s; b[p]=s;
+  if(m.atk>=MATE||won(b,p,s))v=MATE-ply-1;
+  else {let d=depth-1;
+   if(j>=7&&depth>=6&&m.atk<3000&&m.def<3000)d--;
+   v=-search(b,3-s,d,-beta,-alpha,p,(h1^Z1[ii])>>>0,(h2^Z2[ii])>>>0,ply+1);
+   if(!aborted&&d<depth-1&&v>alpha)v=-search(b,3-s,depth-1,-beta,-alpha,p,(h1^Z1[ii])>>>0,(h2^Z2[ii])>>>0,ply+1);
+  }
+  b[p]=0;if(aborted)return 0;
+  if(v>best){best=v;choice=p;}
+  if(v>alpha)alpha=v;
+  if(alpha>=beta){history[p]=Math.min(100000,history[p]+depth*depth*3);break;}
+ }
+ if(tt.size>110000)tt.clear();
+ tt.set(key,{best:choice,depth,score:best,flag:best<=origA?2:best>=beta?1:0});return best;
+}
+// A conservative VCF solver. A claimed win is backed by forced single-point responses.
+// This never counts a mere open three as a proven forcing win.
+let proofNodes=0,proofLimit=2400;
+function vcf(b,attacker,depth,seen){proofNodes++;if(proofNodes>proofLimit||Date.now()>=deadline-350)return false;
+ if(wins(b,3-attacker).length)return false; // defender has immediate winning reply
+ let imm=wins(b,attacker);if(imm.length)return true;
+ if(depth<=0)return false;
+ let options=gen(b,attacker,13,-1).filter(m=>m.atk>=90000).slice(0,11);
+ for(const m of options){let p=m.p;b[p]=attacker;
+  let enemy=wins(b,3-attacker),my=wins(b,attacker),ok=false;
+  if(!enemy.length){
+   if(my.length>=2)ok=true;
+   else if(my.length===1){let block=my[0];b[block]=3-attacker;
+    ok=vcf(b,attacker,depth-1,seen);b[block]=0;
+   }
+  }
+  b[p]=0;if(ok)return true;
+ }
+ return false;
+}
+function vcfMoves(b,side,candidates,depth){let proven=[];
+ for(const m of candidates.slice(0,16)){
+  if(Date.now()>deadline-450||proofNodes>proofLimit)break;
+  b[m.p]=side;
+  let oppWins=wins(b,3-side),myWins=wins(b,side);
+  let ok=false;
+  if(!oppWins.length){if(myWins.length>=2)ok=true;
+   else if(myWins.length===1){let p=myWins[0];b[p]=3-side;ok=vcf(b,side,depth-1);b[p]=0;}}
+  b[m.p]=0;if(ok)proven.push(m);
+ }
+ return proven;
+}
+
+// A fork is a single move that creates TWO independent immediate winning cells.
+// Unlike a generic shape score, this is an actual tactical fact for freestyle Gomoku.
+function criticalForks(b,side,limit){
+ let out=[],ns=neighbors(b);
+ for(const p of ns){
+  const f=features(b,p,side);
+  if(f.four<2)continue;
+  b[p]=side;
+  let w=wins(b,side);
+  b[p]=0;
+  if(w.length>=2)out.push({p,winCells:w,score:f.score});
+  if(out.length>=limit)break;
+ }
+ return out;
+}
+// A threat is only a real fork if the opponent cannot win first after it is played.
+function genuineForks(b,s,limit){
+ let out=criticalForks(b,s,limit*2+3);if(!out.length)return [];
+ let safe=[];
+ for(const m of out){b[m.p]=s;let counter=wins(b,3-s);b[m.p]=0;
+  if(!counter.length){safe.push(m);if(safe.length>=limit)break;}}
+ return safe;
+}
+// Extra tactical defensive heuristic applied at the root: considers the strongest
+// subsequent opponent fork, as well as immediate wins and forcing counterattacks.
+function rootDanger(b,s,p){
+ b[p]=s;
+ let ownWins=wins(b,s),oppWins=wins(b,3-s),danger=0;
+ if(ownWins.length>=2){b[p]=0;return -MATE/2;}
+ if(oppWins.length>=2)danger=MATE/2;
+ else if(oppWins.length===1&&!ownWins.length)danger=MATE/3;
+ if(danger<MATE/3){
+  let oppForks=genuineForks(b,3-s,3);
+  if(oppForks.length){
+   // One follow-up fork can often be parried; several imply a resilient double attack.
+   danger=Math.max(danger,1500000+oppForks.length*420000);
+   if(ownWins.length)danger=Math.min(danger,1100000);
+  }
+ }
+ b[p]=0;return danger;
+}
+// Tactical proof search: every forcing attack must have a unique forced answer.
+// It is deliberately conservative; false positive "wins" are unacceptable.
+let proofCount=0,proofDeadline=0;
+function proveFourChain(b,attacker,remain){
+ if(++proofCount>5200||Date.now()>=proofDeadline)return false;
+ if(wins(b,3-attacker).length)return false;
+ let wonNow=wins(b,attacker);if(wonNow.length)return true;
+ if(remain<=0)return false;
+ let tries=gen(b,attacker,15,-1).filter(m=>m.afs>=1||m.atk>=90000).slice(0,15);
+ for(const m of tries){b[m.p]=attacker;
+  let enemy=wins(b,3-attacker),mine=wins(b,attacker),ok=false;
+  if(!enemy.length){
+   if(mine.length>=2)ok=true;
+   else if(mine.length===1){const forced=mine[0];b[forced]=3-attacker;
+     ok=proveFourChain(b,attacker,remain-1);
+     b[forced]=0;
+   }
+  }
+  b[m.p]=0;if(ok)return true;
+ }
+ return false;
+}
+function provenMove(b,s,root){
+ proofCount=0;let win=[];
+ for(const m of root.slice(0,17)){
+  if(Date.now()>=proofDeadline||proofCount>=5200)break;
+  b[m.p]=s;
+  let enemy=wins(b,3-s),mine=wins(b,s),isWin=false;
+  if(!enemy.length){
+   if(mine.length>=2)isWin=true;
+   else if(mine.length===1){let force=mine[0];b[force]=3-s;
+    isWin=proveFourChain(b,s,7);b[force]=0;
+   }
+  }
+  b[m.p]=0;if(isWin)win.push(m);
+ }
+ return win;
+}
+function chooseMove(ctx){
+ const b=new Uint8Array(SZ);for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+  let v=ctx.board&&ctx.board[r]&&ctx.board[r][c];b[r*N+c]=v===1||v===2?v:0;}
+ const side=ctx.color===2?2:1,begin=Date.now();
+ deadline=begin+9400;proofDeadline=begin+1700;nodes=0;aborted=false;proofNodes=0;
+ history.fill(0);tt.clear();maxNodes=250000;
+ const own=wins(b,side);if(own.length)return answer(own[0],'v7.0',0,0,begin,MATE);
+ const enemy=wins(b,3-side);if(enemy.length){
+  // If there are several winning cells, none can avert the loss; select an
+  // intersection that stops the greatest number of them, then attack if possible.
+  let p=enemy[0];if(enemy.length>1){let ranked=enemy.map(p=>({p,attack:features(b,p,side).score})).sort((a,b)=>b.attack-a.attack);p=ranked[0].p;}
+  return answer(p,'v7.0',0,0,begin,-MATE);
+ }
+ let cnt=0;for(let i=0;i<SZ;i++)if(b[i])cnt++;
+ if(!cnt)return answer(112,'v7.0',0,0,begin,0);
+ let root=gen(b,side,25,-1);
+ if(!root.length)return answer(112,'v7.0',0,0,begin,0);
+ // A verified attacking continuation takes precedence over a heuristic score.
+ let forcing=provenMove(b,side,root);
+ if(forcing.length){forcing.sort((a,b)=>b.atk-a.atk);return answer(forcing[0].p,'v7.0',7,proofCount,begin,MATE-10);}
+ // Defense now receives its own tactical ordering, not just numerical shape ranking.
+ // Keep all moves until forced forks and counter threats have been examined.
+ for(const m of root){
+  m.danger=rootDanger(b,side,m.p);
+  m.protect=m.def;
+  m.tactic=m.priority-Math.min(55000000,m.danger*18);
+ }
+ root.sort((a,b)=>a.danger-b.danger || b.protect-a.protect || b.priority-a.priority);
+ let minimal=root[0].danger;
+ // Permit small strategic tradeoffs, but not a one-move forced defeat when avoidable.
+ let pool=root.filter(m=>m.danger<=Math.max(minimal+300000,minimal*1.22+300000));
+ if(pool.length<3)pool=root.slice(0,Math.min(5,root.length));
+ const poolSet=new Set(pool.map(m=>m.p));
+ // Explicit tactical defense of opponent's next-move open-four; this is
+ // especially important when the existing board offers several attack routes.
+ const oppForks=genuineForks(b,3-side,12);
+ if(oppForks.length){
+  let threatened=new Set(oppForks.map(m=>m.p));
+  for(const m of root)if(threatened.has(m.p))m.tactic+=6200000;
+  root.sort((a,b)=>a.danger-b.danger || b.tactic-a.tactic);
+ }
+ let best=pool[0].p,score=0,completed=0;
+ const hs=hash(b);
+ // Iterative deepening with root ordering and a minimum complete iteration.
+ // Deadline is always honored, even on slower phones.
+ for(let dep=1;dep<=12;dep++){
+  if(Date.now()>=deadline-200)break;
+  let ordered=gen(b,side,dep>=8?12:dep>=5?15:21,best);
+  // Any position where safe replies exist must exclude the known fork-losing moves.
+  if(minimal<2000000)ordered=ordered.filter(m=>poolSet.has(m.p));
+  if(!ordered.length)ordered=pool.slice(0,Math.min(12,pool.length));
+  for(const m of ordered){
+   let rr=root.find(x=>x.p===m.p);
+   m.priority+=(rr?Math.max(-250000000,-rr.danger*30):0)+(m.p===best?250000000:0);
+  }
+  ordered.sort((a,b)=>b.priority-a.priority);
+  let localBest=ordered[0].p,localScore=-INF,alpha=-INF;
+  for(let i=0;i<ordered.length;i++){
+   const m=ordered[i],p=m.p,k=p*3+side;b[p]=side;
+   let v=m.atk>=MATE?MATE-1:-search(b,3-side,dep-1,-INF,-alpha,p,(hs[0]^Z1[k])>>>0,(hs[1]^Z2[k])>>>0,1);
+   b[p]=0;if(aborted)break;
+   // Make the root safety margin consequential even if the search is truncated.
+   if(m.danger>minimal+10000&&dep<5)v-=(m.danger-minimal)*.002;
+   if(v>localScore){localScore=v;localBest=p;}
+   if(v>alpha)alpha=v;
+  }
+  if(aborted)break;
+  best=localBest;score=localScore;completed=dep;
+  if(score>=MATE-1000)break;
+ }
+ // If no depth completed, play the move with the lowest verified tactical danger.
+ return answer(best,'v7.0',completed,nodes+proofCount,begin,score);
+}
+function answer(p,method,depth,nodes,begin,score){return {row:p/15|0,col:p%15,debug:{algorithm:method,depth,nodes,timeMs:Date.now()-begin,score:Math.round(score)}};}
+const LINES={
+ start:['这一次，我会把每一条潜在的杀棋都算进去。','棋盘不变，规则不变。这一局认真下。','落子开始，先看棋形。'],
+ thinking:['我要先检查冲四、活三和反击的次序。','这一手，得把后面的强制应对算清楚。','别急，正在查算连续威胁。','我再验证一下防点。'],
+ sleeping:['轮到你了，我先看一眼其他棋形。','你的下一手，会落在哪里？'],
+ move:['棋子落在这里。','这次我换一条进攻路线。','这手背后还有后续。'],
+ afterOpponentMove:['看到了。你的威胁，我会重新计算。','这手不错，得认真回应。','在这里转向进攻？'],
+ block:['这次先堵住真正的危险点。','四连与活三，我都在留意。','不能只防眼前这一手。'],
+ threat:['该你解这一手威胁了。','这条线还有续招。','冲四只是开始。'],
+ win:['五子成线。这次是我赢了。','杀棋成立。下次换你先试试？'],
+ lose:['这局你找到了我的漏洞。我会记住这盘棋。','又被你连成五子了。精彩的一手。'],
+ draw:['棋盘下满，平局。']
+};
+window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,chooseMove};
+})();
+
 
 </script>
 <script>
@@ -1705,7 +2561,7 @@
   var downloadSampleBtn=$('downloadSample'), startBtn=$('startBtn'), restartBtn=$('restart');
   var downloadLogBtn=$('downloadLog'), logPanel=$('logPanel'), barBlack=$('barBlack'), barWhite=$('barWhite');
   var diffTag=$('diffTag'), fireLayer=$('fireLayer'), floatHearts=$('floatHearts');
-  var board=new Uint8Array(MAX),turn=BLACK,humanColor=BLACK,aiColor=WHITE,selectedSide=BLACK;
+  var board=new Uint8Array(MAX),turn=BLACK,humanColor=WHITE,aiColor=BLACK,selectedSide=WHITE;
   var gameOver=true,aiThinking=false,lastMove=-1,winnerLine=[],gameLog=null,gameToken=0;
   var loadedAI=null, loadedSource='', activeWorker=null, activeAIUrl=null;
   var speechTimer=null,currentEmojiEvent=null,emojiCache={},humanWaitTimer=null;
@@ -2010,7 +2866,7 @@
     var curr=lastMove<0?'尚未落子':posName(lastMove)+' · '+CN[board[lastMove]];
     infoEl.innerHTML='<div class="info-title">落子信息 <span class="coord">15 × 15</span></div>'+
       '<div class="row"><span>规则</span><b>自由五子棋（无禁手）</b></div>'+
-      '<div class="row"><span>首手</span><b>黑棋先行 · 不旋转棋盘</b></div>'+
+      '<div class="row"><span>首手</span><b>黑棋先行</b></div>'+
       '<div class="row"><span>上一手</span><b>'+escapeHtml(curr)+'</b></div>'+
       '<div class="row total"><span>已落子</span><b>'+(counts[BLACK]+counts[WHITE])+' / 225</b></div>';
   }
@@ -2128,10 +2984,10 @@
         activeWorker=new Worker(activeAIUrl);
         var w=activeWorker,done=false;
         function finish(err,res){if(done)return;done=true;clearTimeout(timeout);if(activeWorker===w)killWorker();if(err)reject(err);else resolve(res);}
-        var timeout=setTimeout(function(){finish(new Error('搜索超时'));},8000);
+        var timeout=setTimeout(function(){finish(new Error('搜索超时'));},loadedAI.forceBlack?14800:15000);
         w.onmessage=function(e){var data=e.data;if(!data.ok)finish(new Error(data.error));else finish(null,data);};
         w.onerror=function(e){finish(new Error('AI 工作线程异常：'+(e.message||'unknown')));};
-        w.postMessage({board:ctx.board,color:ctx.color,ply:ctx.ply,level:loadedAI.level??100,moves:ctx.moves});
+        w.postMessage({board:ctx.board,color:ctx.color,ply:ctx.ply,level:loadedAI.level??100,moves:ctx.moves,timeLimitMs:14200});
       }catch(e){killWorker();reject(e);}
     });
   }
@@ -2150,9 +3006,10 @@
     if(!aiSay('thinking',{ply:gameLog.moves.length}))setAIEmoji('thinking');
     var token=gameToken,start=performance.now(),ctx=buildCtx(),humanThreat=winningPlaces(board,humanColor);
     var thinkPromise;
-    // 单 HTML 打开即可：优先后台 Worker 防止搜索期间界面卡住；不支持则主线程兜底。
-    try {thinkPromise=askWorker(ctx).catch(function(){return Promise.resolve().then(function(){return {decision:loadedAI.chooseMove(ctx)};});});}
-    catch(e){thinkPromise=Promise.resolve().then(function(){return {decision:loadedAI.chooseMove(ctx)};});}
+    // v8 worker-only: never run the heavy search on the UI thread when Workers fail.
+    if(loadedAI.forceBlack){thinkPromise=askWorker(ctx);}
+    else {try {thinkPromise=askWorker(ctx).catch(function(){return Promise.resolve().then(function(){return {decision:loadedAI.chooseMove(ctx)};});});}
+    catch(e){thinkPromise=Promise.resolve().then(function(){return {decision:loadedAI.chooseMove(ctx)};});}}
     thinkPromise.then(function(result){
       if(token!==gameToken||gameOver||turn!==aiColor)return;
       var decision=result&&result.decision;
@@ -2184,10 +3041,11 @@
     });
   }
   function onAILoaded(data){
-    loadedAI=data.ai;loadedSource=data.code;emojiCache={};currentEmojiEvent=null;
+    loadedAI=data.ai;
+    if(loadedAI.forceBlack){selectedSide=WHITE;syncSidePolicy();}loadedSource=data.code;emojiCache={};currentEmojiEvent=null;
     var name=loadedAI.name||'未命名 AI',ver=loadedAI.version||'?';
-    setAIStatus('✔ 已加载：'+name+' v'+ver+' · '+data.label,'ok');
-    aiInfoEl.innerHTML='当前 AI：<b>'+escapeHtml(name)+'</b> · '+escapeHtml(String(ver));
+    setAIStatus('✔ 已加载：'+name,'ok');
+    aiInfoEl.innerHTML='当前 AI：<b>'+escapeHtml(name)+'</b>';
     aiNameplate.textContent=name;startBtn.disabled=false;setAIEmoji('default');preloadAllEmojis();
   }
   function setAIStatus(msg,cls){aiStatusEl.textContent=msg;aiStatusEl.className='ai-status'+(cls?' '+cls:'');}
@@ -2198,8 +3056,8 @@
     reader.onerror=function(){onAIError(new Error('文件读取失败'));};reader.readAsText(file);
   }
   function getBuiltInAISource(kind){
-    var src=$('sampleAISource').textContent;
-    if(kind==='50')src+='\n'+$('sampleAIWeakPatch').textContent;
+    var src=kind==='v8'?$('sampleAIV8Source').textContent:kind==='v7'?$('sampleAIV7Source').textContent:kind==='v6'?$('sampleAI100Source').textContent:$('sampleAISource').textContent;
+    if(kind==='v5')src+='\n'+$('sampleAI75Patch').textContent;
     return src;
   }
   function applyAdvancedSettings(){
@@ -2209,12 +3067,13 @@
     css.setProperty('--bubble-border',$('optBorderColor').value);
     css.setProperty('--bubble-color',$('optFontColor').value);
     css.setProperty('--bubble-font',FONT_MAP[$('optFont').value]||FONT_MAP.cute);
+    boardEl.dataset.stoneStyle=$('optStoneStyle').value;
     fxEnabled.shake=$('fxShake').checked;fxEnabled.explode=$('fxExplode').checked;
     fxEnabled.quake=$('fxQuake').checked;fxEnabled.fire=$('fxFire').checked;
   }
   function startGame(){
     if(!loadedAI)return;gameToken++;killWorker();applyAdvancedSettings();
-    board.fill(0);turn=BLACK;humanColor=selectedSide;aiColor=other(humanColor);
+    board.fill(0);turn=BLACK;humanColor=loadedAI.forceBlack?WHITE:selectedSide;aiColor=other(humanColor);
     lastMove=-1;winnerLine=[];gameOver=false;aiThinking=false;
     gameLog={startMs:Date.now(),endTime:null,durationMs:null,humanColor:humanColor,aiColor:aiColor,
       aiName:loadedAI.name||'未命名 AI',aiVersion:loadedAI.version||'?',moves:[],result:null};
@@ -2225,7 +3084,7 @@
   }
   function backToStart(){
     gameToken++;killWorker();gameOver=true;aiThinking=false;stopHumanTimer();clearSpeech();
-    startScreen.classList.remove('hidden');statusText='请选择棋子颜色与 AI 难度';render();
+    startScreen.classList.remove('hidden');statusText='请选择棋子颜色与 AI 版本';render();
   }
   function downloadLog(){
     if(!gameLog)return;
@@ -2238,6 +3097,7 @@
     document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1500);
   }
   sideChoice.addEventListener('click',function(e){var btn=e.target.closest('[data-color]');if(!btn)return;
+    if(builtinAiSelect.value==='v8'||(loadedAI&&loadedAI.forceBlack))return;
     selectedSide=Number(btn.dataset.color);
     Array.prototype.forEach.call(sideChoice.children,function(x){x.classList.toggle('active',x===btn);});
   });
@@ -2246,14 +3106,22 @@
   ['dragenter','dragover'].forEach(function(event){dropZone.addEventListener(event,function(e){e.preventDefault();dropZone.classList.add('dragover');});});
   ['dragleave','drop'].forEach(function(event){dropZone.addEventListener(event,function(e){e.preventDefault();dropZone.classList.remove('dragover');});});
   dropZone.addEventListener('drop',function(e){var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)handleAIFile(f);});
+  function syncSidePolicy(){
+    var fixed=builtinAiSelect.value==='v8';
+    $('sideChoiceLabel').textContent=fixed?'执棋颜色 · AI 执黑先手':'选择执棋颜色';
+    Array.prototype.forEach.call(sideChoice.querySelectorAll('button'),function(btn){
+      btn.disabled=fixed;btn.classList.toggle('active',Number(btn.dataset.color)===(fixed?2:selectedSide));
+    });
+    if(fixed)selectedSide=WHITE;
+  }
   builtinAiSelect.addEventListener('change',function(){
-    var kind=builtinAiSelect.value;if(!kind)return;
-    var name=kind==='50'?'江祈言-50%':'江祈言-100%';
+    var kind=builtinAiSelect.value;if(!kind)return;syncSidePolicy();
+    var name=kind.replace('v','v')+'.0';
     setAIStatus('正在加载：'+name);
     loadAISource(getBuiltInAISource(kind),name).then(onAILoaded).catch(onAIError);
   });
   downloadSampleBtn.addEventListener('click',function(){
-    var kind=builtinAiSelect.value||'100';var blob=new Blob([getBuiltInAISource(kind)],{type:'text/javascript;charset=utf-8'});
+    var kind=builtinAiSelect.value||'v8';var blob=new Blob([getBuiltInAISource(kind)],{type:'text/javascript;charset=utf-8'});
     var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;
     a.download='jiang-qiyan-gomoku-'+kind+'.js';document.body.appendChild(a);a.click();a.remove();
     setTimeout(function(){URL.revokeObjectURL(url);},1500);
@@ -2262,7 +3130,7 @@
   downloadLogBtn.addEventListener('click',downloadLog);
   createPixelHearts();window.addEventListener('resize',createPixelHearts);setAIEmoji('default');render();
   // 默认预选最高档，打开网页即能开始，无需上传文件。
-  builtinAiSelect.value='100';loadAISource(getBuiltInAISource('100'),'江祈言-100%').then(onAILoaded).catch(onAIError);
+  builtinAiSelect.value='v8';syncSidePolicy();loadAISource(getBuiltInAISource('v8'),'v8.0').then(onAILoaded).catch(onAIError);
 })();
 
 </script>
