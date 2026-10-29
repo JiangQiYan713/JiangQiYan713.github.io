@@ -2,17 +2,15 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>壁纸随机跳转中。。。</title>
+    <title>随机跳转</title>
 </head>
 <body>
-    <button id="btn" disabled>扫描中...</button>
+    <p id="msg">扫描中...</p>
     <script>
-        const MAX = 999;        // 最多探测到多少号
-        const PAD = 3;          // 编号补零位数
-        const CONCURRENCY = 20; // 并发数，避免一次发太多请求
+        const MAX = 999;
+        const PAD = 3;
 
-        const btn = document.getElementById('btn');
-        const found = [];
+        const msg = document.getElementById('msg');
 
         function pad(n) {
             return String(n).padStart(PAD, '0');
@@ -28,31 +26,25 @@
         }
 
         async function scan() {
-            const nums = Array.from({ length: MAX }, (_, i) => i + 1);
-
-            for (let i = 0; i < nums.length; i += CONCURRENCY) {
-                const batch = nums.slice(i, i + CONCURRENCY);
-                const results = await Promise.all(
-                    batch.map(async n => {
-                        const name = pad(n);
-                        return (await exists(name)) ? name : null;
-                    })
-                );
-                results.forEach(r => { if (r) found.push(r); });
-                btn.textContent = `扫描中... ${i + batch.length}/${MAX}`;
+            const found = [];
+            for (let n = 1; n <= MAX; n++) {
+                const name = pad(n);
+                if (await exists(name)) {
+                    found.push(name);
+                    msg.textContent = `已找到 ${found.length} 个... (当前 ${name})`;
+                } else {
+                    break; // 遇到断号直接停止
+                }
             }
 
             if (found.length === 0) {
-                btn.textContent = '没有找到任何有效壁纸';
+                msg.textContent = '没有找到任何有效文件夹';
                 return;
             }
-            found.sort();
-            btn.disabled = false;
-            btn.textContent = `随机打开 (共 ${found.length} 个)`;
-            btn.onclick = () => {
-                const pick = found[Math.floor(Math.random() * found.length)];
-                location.href = pick + '/index.html';
-            };
+
+            const pick = found[Math.floor(Math.random() * found.length)];
+            msg.textContent = `共 ${found.length} 个，跳转到 ${pick}...`;
+            location.href = pick; // 直接写 /010，服务器会自动找 index.html
         }
 
         scan();
