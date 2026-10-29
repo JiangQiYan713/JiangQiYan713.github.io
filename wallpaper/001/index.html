@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>OC 赛博朋克动态壁纸</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="wallpaper"></canvas>
+    <div id="loading-state" role="status">正在加载初始画面…</div>
+    <div id="hud">
+      <div id="title">OC Cyberpunk Wallpaper · Offline HTML</div>
+      <button id="settings-toggle" aria-label="打开设置">⚙</button>
+      <aside id="settings-panel" aria-label="动态壁纸设置面板">
+        <h2>动态壁纸设置</h2>
+        <p>可直接离线打开。通过下方参数可实时调节景深、粒子、头发摆动、亮度与视差效果。</p>
+
+        <div class="group">
+          <div class="group-title">背景</div>
+          <div class="control">
+            <label for="backgroundBlur"><span>背景模糊</span><span class="value-badge" data-value-for="backgroundBlur"></span></label>
+            <input id="backgroundBlur" type="range" min="0" max="4" step="0.1">
+          </div>
+          <div class="control">
+            <label for="backgroundBrightness"><span>背景亮度</span><span class="value-badge" data-value-for="backgroundBrightness"></span></label>
+            <input id="backgroundBrightness" type="range" min="0.7" max="1.4" step="0.01">
+          </div>
+          <div class="control">
+            <label for="parallax"><span>背景视差</span><span class="value-badge" data-value-for="parallax"></span></label>
+            <input id="parallax" type="range" min="0" max="36" step="1">
+          </div>
+          <div class="control">
+            <label for="twinkleIntensity"><span>灯光闪烁强度</span><span class="value-badge" data-value-for="twinkleIntensity"></span></label>
+            <input id="twinkleIntensity" type="range" min="0" max="1.6" step="0.01">
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">人物与粒子</div>
+          <div class="control">
+            <label for="hairStrength"><span>发丝动画速度</span><span class="value-badge" data-value-for="hairStrength"></span></label>
+            <input id="hairStrength" type="range" min="0" max="2.2" step="0.01">
+          </div>
+          <div class="control">
+            <label for="particleCount"><span>粒子数量</span><span class="value-badge" data-value-for="particleCount"></span></label>
+            <input id="particleCount" type="range" min="0" max="180" step="1">
+          </div>
+          <div class="control">
+            <label for="particleSpeed"><span>粒子速度</span><span class="value-badge" data-value-for="particleSpeed"></span></label>
+            <input id="particleSpeed" type="range" min="0" max="2.6" step="0.01">
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">开关</div>
+          <div class="toggle-row"><label for="showParticles">显示粒子</label><input id="showParticles" type="checkbox"></div>
+          <div class="toggle-row"><label for="showTwinkles">显示灯光闪烁</label><input id="showTwinkles" type="checkbox"></div>
+          <div class="toggle-row"><label for="pause">暂停动画</label><input id="pause" type="checkbox"></div>
+        </div>
+
+        <button class="secondary" id="resetSettings" type="button">恢复默认设置</button>
+      </aside>
+    </div>
+  </div>
+
+  <script src="data/config.js"></script>
+  <script src="data/window_lights.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
