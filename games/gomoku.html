@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>江祈言 · 五子棋人机对弈</title>
 <style>
 
@@ -1348,91 +1349,91 @@
 </head>
 <body>
 <div class="app">
-  <div class="board-container" id="boardContainer" data-ai-pos="topleft">
-    <div class="board" id="board" data-stone-style="celestial" aria-label="十五路五子棋棋盘"></div>
-    <div class="fire-layer" id="fireLayer"></div>
-    <div class="ai-stage" id="aiStage">
-      <div class="ai-bubble" id="speech"></div>
-      <div class="ai-avatar-shell">
-        <div class="ai-avatar" id="aiAvatar"></div>
-        <div class="ai-nameplate" id="aiNameplate">江祈言</div>
-      </div>
-    </div>
-  </div>
-  <div class="float-hearts-layer" id="floatHearts"></div>
-  <div class="panel">
-    <h1>五子棋 · 人机对弈</h1>
-    <div class="sub">JIANG QIYAN · GOMOKU</div>
-    <div class="ai-info" id="aiInfo">当前 AI：<b>江祈言</b> · 正在载入</div>
-    <div class="material-bar">
-      <span class="label">落子数量</span>
-      <div class="bar-wrap">
-        <div class="bar-fill black" id="barBlack" style="width:50%"></div>
-        <div class="bar-fill white" id="barWhite" style="width:50%"></div>
-      </div>
-      <span class="diff-tag even" id="diffTag">黑 0 : 0 白</span>
-    </div>
-    <div class="status" id="status">加载 AI 后开始对局</div>
-    <div class="log-panel" id="logPanel"><div class="log-line" style="color:#8f84b5">— Jiang Qiyan · Gomoku Log —</div></div>
-    <div id="info"></div>
-    <div class="btn-row">
-      <button id="downloadLog" disabled>下载对局日志</button>
-      <button id="restart" class="ghost">重新开始</button>
-    </div>
-  </div>
+<div class="board-container" data-ai-pos="topleft" id="boardContainer">
+<div aria-label="十五路五子棋棋盘" class="board" data-stone-style="celestial" id="board"></div>
+<div class="fire-layer" id="fireLayer"></div>
+<div class="ai-stage" id="aiStage">
+<div class="ai-bubble" id="speech"></div>
+<div class="ai-avatar-shell">
+<div class="ai-avatar" id="aiAvatar"></div>
+<div class="ai-nameplate" id="aiNameplate">江祈言</div>
+</div>
+</div>
+</div>
+<div class="float-hearts-layer" id="floatHearts"></div>
+<div class="panel">
+<h1>五子棋 · 人机对弈</h1>
+<div class="sub">JIANG QIYAN · GOMOKU</div>
+<div class="ai-info" id="aiInfo">当前 AI：<b>江祈言</b> · 正在载入</div>
+<div class="material-bar">
+<span class="label">落子数量</span>
+<div class="bar-wrap">
+<div class="bar-fill black" id="barBlack" style="width:50%"></div>
+<div class="bar-fill white" id="barWhite" style="width:50%"></div>
+</div>
+<span class="diff-tag even" id="diffTag">黑 0 : 0 白</span>
+</div>
+<div class="status" id="status">加载 AI 后开始对局</div>
+<div class="log-panel" id="logPanel"><div class="log-line" style="color:#8f84b5">— Jiang Qiyan · Gomoku Log —</div></div>
+<div id="info"></div>
+<div class="btn-row">
+<button disabled="" id="downloadLog">下载对局日志</button>
+<button class="ghost" id="restart">重新开始</button>
+</div>
+</div>
 </div>
 <div class="overlay" id="startScreen">
-  <div class="dialog">
-    <h2>五子棋 · 准备开局</h2>
-    <p>15 × 15 棋盘，<b>黑棋先行</b>，任意方向连成五子即获胜（自由规则、无禁手）。<br>棋盘始终保持固定方向，不会随阵营旋转。</p>
-    <div class="sec-title" id="sideChoiceLabel">选择执棋颜色</div>
-    <div class="choice" id="sideChoice">
-      <button data-color="1" class="active">● 执黑先手</button>
-      <button data-color="2">○ 执白后手</button>
-    </div>
-    <div class="sec-title">江祈言 · AI 版本</div>
-    <div class="sample-row">
-      <select id="builtinAiSelect" class="builtin-select">
-        <option value="v8" selected>v8.0 - 最强算法·强制AI执黑</option>
-        <option value="v7">v7.0 - 加强算法</option>
-        <option value="v6">v6.0 - 中等算法</option>
-        <option value="v5">v5.0 - 基础算法</option>
-      </select>
-    </div>
-    <div class="ai-status" id="aiStatus">正在加载 v7.0…</div>
-    <div class="sec-title">可选：导入自定义五子棋 AI</div>
-    <div class="drop" id="dropZone">
-      <input type="file" id="aiFile" accept=".js,text/javascript,application/javascript" hidden>
-      将 <b>.js</b> 文件拖到这里，或 <u>点击导入</u><br>
-      <small>接口：window.ChessAI.chooseMove(ctx) → {row, col}</small>
-    </div>
-    <div class="mini-btns" style="margin-top:10px">
-      <button id="downloadSample" class="ghost">下载当前内置 AI（.js）</button>
-    </div>
-    <details class="adv-settings">
-      <summary>视觉与特效设置</summary>
-      <div class="adv-body">
-        <div class="adv-row"><label>AI 角色位置</label><select id="optAiPos">
-          <option value="below">棋盘正下方</option><option value="above">棋盘正上方</option><option value="topleft" selected>棋盘左上方</option>
-        </select></div>
-        <div class="adv-row"><label>棋子外观</label><select id="optStoneStyle"><option value="celestial" selected>星穹晶玉</option><option value="classic">经典紫粉</option></select></div>
-        <div class="adv-row"><label>气泡背景色</label><input type="color" id="optBgColor" value="#0d0d12"></div>
-        <div class="adv-row"><label>气泡边框色</label><input type="color" id="optBorderColor" value="#d946ef"></div>
-        <div class="adv-row"><label>台词字体色</label><input type="color" id="optFontColor" value="#e879ff"></div>
-        <div class="adv-row"><label>台词字体</label><select id="optFont">
-          <option value="cute" selected>可爱</option><option value="serif">衬线</option><option value="sans">无衬线</option><option value="mono">等宽</option>
-        </select></div>
-        <div style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.12);font-size:11px;color:#8fa3b6">特效开关</div>
-        <div class="adv-row"><label>关键威胁棋子闪烁</label><input type="checkbox" id="fxShake" checked></div>
-        <div class="adv-row"><label>五子连珠胜利粒子</label><input type="checkbox" id="fxExplode" checked></div>
-        <div class="adv-row"><label>双威胁棋盘震动</label><input type="checkbox" id="fxQuake" checked></div>
-        <div class="adv-row"><label>冲四时棋盘光效</label><input type="checkbox" id="fxFire" checked></div>
-      </div>
-    </details>
-    <button id="startBtn" disabled>开始五子棋对弈</button>
-  </div>
+<div class="dialog">
+<h2>五子棋 · 准备开局</h2>
+<p>15 × 15 棋盘，<b>黑棋先行</b>，任意方向连成五子即获胜（自由规则、无禁手）。<br/>棋盘始终保持固定方向，不会随阵营旋转。</p>
+<div class="sec-title" id="sideChoiceLabel">选择执棋颜色</div>
+<div class="choice" id="sideChoice">
+<button class="active" data-color="1">● 执黑先手</button>
+<button data-color="2">○ 执白后手</button>
 </div>
-<script type="text/plain" id="sampleAISource">
+<div class="sec-title">江祈言 · AI 版本</div>
+<div class="sample-row">
+<select class="builtin-select" id="builtinAiSelect"><option selected="" value="v81">v8.1 - 最难／强制执白</option>
+<option value="v8">v8.0 - 极难／强制执白</option>
+<option value="v7">v7.0 - 高难度</option>
+<option value="v6">v6.0 - 中等难度</option>
+<option value="v5">v5.0 - 最简单</option>
+</select>
+</div>
+<div class="ai-status" id="aiStatus">正在加载 v8.1…</div>
+<div class="sec-title">可选：导入自定义五子棋 AI</div>
+<div class="drop" id="dropZone">
+<input accept=".js,text/javascript,application/javascript" hidden="" id="aiFile" type="file"/>
+      将 <b>.js</b> 文件拖到这里，或 <u>点击导入</u><br/>
+<small>接口：window.ChessAI.chooseMove(ctx) → {row, col}</small>
+</div>
+<div class="mini-btns" style="margin-top:10px">
+<button class="ghost" id="downloadSample">下载当前内置 AI（.js）</button>
+</div>
+<details class="adv-settings">
+<summary>视觉与特效设置</summary>
+<div class="adv-body">
+<div class="adv-row"><label>AI 角色位置</label><select id="optAiPos">
+<option value="below">棋盘正下方</option><option value="above">棋盘正上方</option><option selected="" value="topleft">棋盘左上方</option>
+</select></div>
+<div class="adv-row"><label>棋子外观</label><select id="optStoneStyle"><option selected="" value="celestial">星穹晶玉</option><option value="classic">经典紫粉</option></select></div>
+<div class="adv-row"><label>气泡背景色</label><input id="optBgColor" type="color" value="#0d0d12"/></div>
+<div class="adv-row"><label>气泡边框色</label><input id="optBorderColor" type="color" value="#d946ef"/></div>
+<div class="adv-row"><label>台词字体色</label><input id="optFontColor" type="color" value="#e879ff"/></div>
+<div class="adv-row"><label>台词字体</label><select id="optFont">
+<option selected="" value="cute">可爱</option><option value="serif">衬线</option><option value="sans">无衬线</option><option value="mono">等宽</option>
+</select></div>
+<div style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.12);font-size:11px;color:#8fa3b6">特效开关</div>
+<div class="adv-row"><label>关键威胁棋子闪烁</label><input checked="" id="fxShake" type="checkbox"/></div>
+<div class="adv-row"><label>五子连珠胜利粒子</label><input checked="" id="fxExplode" type="checkbox"/></div>
+<div class="adv-row"><label>双威胁棋盘震动</label><input checked="" id="fxQuake" type="checkbox"/></div>
+<div class="adv-row"><label>冲四时棋盘光效</label><input checked="" id="fxFire" type="checkbox"/></div>
+</div>
+</details>
+<button disabled="" id="startBtn">开始五子棋对弈</button>
+</div>
+</div>
+<script id="sampleAISource" type="text/plain">
 /* 江祈言 · 五子棋策略引擎（无外部依赖）
  * 标准 15×15 自由规则：连续五子及以上胜；无禁手。
  * 100%：即时胜/必防检测 + 活四冲四活三判别 + 威胁优先的迭代加深
@@ -1696,8 +1697,7 @@
 })();
 
 </script>
-
-<script type="text/plain" id="sampleAI75Patch">
+<script id="sampleAI75Patch" type="text/plain">
 (function(){
  'use strict';
  const ai=window.ChessAI;if(!ai)return;
@@ -1711,7 +1711,7 @@
 })();
 
 </script>
-<script type="text/plain" id="sampleAI100Source">
+<script id="sampleAI100Source" type="text/plain">
 /* Jiang Qiyan · Gomoku 100% Tactical Engine v6.0
  * 15×15 freestyle Gomoku. Pure JavaScript, browser Worker compatible.
  * Threat-oriented negamax, iterative deepening, TT, tactical defense,
@@ -1929,7 +1929,416 @@ window.ChessAI={name:'v6.0',version:'6.0',level:'v6.0',lines:LINES,emojis:null,c
 })();
 
 </script>
-<script type="text/plain" id="sampleAIV8Source">
+<script id="sampleAIV81Source" type="text/plain">
+
+/* Jiang Qiyan Gomoku v8.1 — offline black-first threat engine.
+ * Freestyle 15x15, no forbidden moves. All computations are local.
+ */
+(function(){
+'use strict';
+const N=15,SZ=225,DIR=[[1,0],[0,1],[1,1],[1,-1]],MATE=900000000,INF=1000000000;
+const areas=Array.from({length:SZ},()=>[]),rays=Array.from({length:SZ},()=>[]),center=new Int8Array(SZ);
+for(let p=0;p<SZ;p++){
+ const r=(p/15)|0,c=p%15;center[p]=Math.abs(r-7)+Math.abs(c-7);
+ for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++){
+  const rr=r+dr,cc=c+dc;if(rr>=0&&rr<15&&cc>=0&&cc<15)areas[p].push(rr*15+cc);
+ }
+ const set=new Set([p]);for(const [dr,dc] of DIR)for(let d=-4;d<=4;d++){
+  const rr=r+d*dr,cc=c+d*dc;if(rr>=0&&rr<15&&cc>=0&&cc<15)set.add(rr*15+cc);
+ }rays[p]=Array.from(set);
+}
+const segments=[],segmentDirs=[];
+for(let r=0;r<15;r++)for(let c=0;c<15;c++)for(let dir=0;dir<4;dir++){
+ const [dr,dc]=DIR[dir];
+ if(r+dr*4<0||r+dr*4>=15||c+dc*4<0||c+dc*4>=15)continue;
+ segments.push(Array.from({length:5},(_,k)=>(r+dr*k)*15+c+dc*k));segmentDirs.push(dir);
+}
+const zob=new Uint32Array(SZ*3),zob2=new Uint32Array(SZ*3);let rngseed=0x6d4e8b29;
+function rng(){rngseed^=rngseed<<13;rngseed^=rngseed>>>17;rngseed^=rngseed<<5;return rngseed>>>0;}
+for(let i=0;i<zob.length;i++){zob[i]=rng();zob2[i]=rng();}
+let b,near,stamp,cache,seen,hash1,hash2,tt,history,deadline,nodes,proofNodes,proofDeadline,stopFlag,rootPly;
+function initialize(board){
+ b=new Uint8Array(SZ);near=new Uint8Array(SZ);stamp=new Uint32Array(SZ);stamp.fill(1);
+ cache=[null,Array(SZ),Array(SZ)];seen=[null,new Uint32Array(SZ),new Uint32Array(SZ)];
+ history=new Float64Array(SZ);tt=new Map();hash1=0;hash2=0;
+ for(let i=0;i<SZ;i++)if(board[i]){b[i]=board[i];const k=i*3+b[i];hash1^=zob[k];hash2^=zob2[k];for(const p of areas[i])near[p]++;}
+ nodes=0;proofNodes=0;stopFlag=false;
+}
+function make(p,side){b[p]=side;let k=p*3+side;hash1^=zob[k];hash2^=zob2[k];for(const q of areas[p])near[q]++;for(const q of rays[p])stamp[q]++;}
+function undo(p,side){b[p]=0;let k=p*3+side;hash1^=zob[k];hash2^=zob2[k];for(const q of areas[p])near[q]--;for(const q of rays[p])stamp[q]++;}
+function tick(){if((nodes&63)===0&&Date.now()>=deadline)stopFlag=true;return stopFlag;}
+function hasWon(p,side){const r=p/15|0,c=p%15;
+ for(const [dr,dc] of DIR){let count=1;
+  for(const sign of [-1,1])for(let d=1;d<=4;d++){
+   const rr=r+sign*d*dr,cc=c+sign*d*dc;if(rr<0||rr>=15||cc<0||cc>=15||b[rr*15+cc]!==side)break;count++;
+  }if(count>=5)return true;
+ }return false;}
+function matchCore(line,patterns){
+ for(const pat of patterns){let ix=line.indexOf(pat);
+  while(ix>=0){if(ix<=4&&ix+pat.length>4)return true;ix=line.indexOf(pat,ix+1);}
+ }return false;
+}
+function point(p,s){
+ if(b[p])return null;
+ if(seen[s][p]===stamp[p])return cache[s][p];
+ const r=p/15|0,c=p%15;let score=0,four=0,three=0,liveFour=0,twos=0,win=false;
+ const axis=[0,0,0,0];let direction=0;
+ b[p]=s;
+ for(const [dr,dc] of DIR){
+  const ax=direction++;let line='';for(let d=-4;d<=4;d++){
+   let rr=r+d*dr,cc=c+d*dc;line+=rr<0||rr>=15||cc<0||cc>=15?'#':b[rr*15+cc]===s?'X':b[rr*15+cc]===0?'.':'#';
+  }
+  let endings=0,winMask=0;
+  for(let st=0;st<=4;st++){
+   let n=0,emp=-1,blocked=false;
+   for(let j=st;j<st+5;j++)if(line[j]==='#'){blocked=true;break;}else if(line[j]==='X')n++;else emp=j;
+   if(blocked)continue;
+   if(n===5){win=true;break;}
+   if(n===4&&emp>=0)winMask|=1<<emp;
+  }
+  if(win)break;
+  endings=0;for(let i=0;i<9;i++)if(winMask&(1<<i))endings++;
+  if(endings>=2){four+=2;liveFour++;axis[ax]=4;score+=36000000;}
+  else if(endings===1){four++;axis[ax]=3;score+=1700000;}
+  else if(matchCore(line,['.XXX.','.XX.X.','.X.XX.'])) {three++;axis[ax]=2;score+=82000;}
+  else if(matchCore(line,['.XXX','XXX.','.XX.X','X.XX.'])){axis[ax]=1;score+=21000;}
+  else if(matchCore(line,['.XX.','.X.X.','.X.X','X.X.'])){twos++;score+=3700;}
+  else if(matchCore(line,['.XX','XX.','X.X']))score+=460;
+  else if(matchCore(line,['.X.']))score+=24;
+ }
+ b[p]=0;
+ if(win)score=MATE;
+ else {if(four>=2)score+=95000000;if(four&&three)score+=4200000;if(three>=2)score+=1800000;
+       if(three>=3)score+=2000000;if(twos>=2)score+=2000;score+=Math.max(0,18-center[p])*12;}
+ let shared=0,activeAxes=0,forcingAxes=0;
+ for(let k=0;k<4;k++)if(axis[k]>=2){activeAxes++;if(axis[k]>=3)forcingAxes++;}
+ if(activeAxes>=2){shared=1;score+=activeAxes===2?650000:1800000;
+  if(forcingAxes&&activeAxes>=2)score+=2700000;
+  if(forcingAxes>=2)score+=25000000;
+ }
+ let v={score,four,three,liveFour,win,axis,shared,activeAxes,forcingAxes};cache[s][p]=v;seen[s][p]=stamp[p];return v;
+}
+function candidates(){let out=[];for(let p=0;p<SZ;p++)if(!b[p]&&near[p]>0)out.push(p);return out.length?out:[112];}
+function winningCells(side){let list=[];for(let p=0;p<SZ;p++)if(!b[p]&&near[p]&&point(p,side).win)list.push(p);return list;}
+function moves(side,width,ttMove=-1){
+ const mine=winningCells(side);if(mine.length)return mine.map(p=>({p,priority:MATE*5,at:MATE,df:0}));
+ const theirs=winningCells(3-side);if(theirs.length)return theirs.map(p=>({p,priority:MATE*4,at:0,df:MATE}));
+ let ret=[];
+ for(const p of candidates()){
+  const a=point(p,side),d=point(p,3-side);
+  const pr=a.score*1.05+d.score*1.13+history[p]+(p===ttMove?100000000:0);
+  ret.push({p,priority:pr+(a.shared?Math.min(12000000,a.score*.12):0)+(d.shared?Math.min(14000000,d.score*.18):0),at:a.score,df:d.score,af:a.four,dt:d.three,dfour:d.four,
+  multi:a.activeAxes,defMulti:d.activeAxes});
+ }
+ ret.sort((x,y)=>y.priority-x.priority);
+ if(width&&ret.length>width){
+  const selection=ret.slice(0,width),set=new Set(selection.map(m=>m.p));
+  // Never prune out a forcing four, fork or a high-priority defensive point.
+  for(const m of ret)if(m.af||m.dfour||m.at>=1800000||m.df>=1800000){if(!set.has(m.p)){selection.push(m);set.add(m.p);}}
+  selection.sort((x,y)=>y.priority-x.priority);return selection.slice(0,width+7);
+ }
+ return ret;
+}
+function quickEval(side){
+ let a=0,a2=0,e=0,e2=0;
+ for(const p of candidates()){
+  let x=point(p,side).score,y=point(p,3-side).score;
+  if(x>a){a2=a;a=x;}else if(x>a2)a2=x;
+  if(y>e){e2=e;e=y;}else if(y>e2)e2=y;
+ }
+ let s=a*1.05+a2*.16-e*1.16-e2*.20;
+ return Math.max(-MATE/2,Math.min(MATE/2,s));
+}
+function search(side,depth,alpha,beta,last,ply,ext){
+ nodes++;if(tick())return 0;
+ if(last>=0&&hasWon(last,3-side))return -MATE+ply;
+ const own=winningCells(side);if(own.length)return MATE-ply-1;
+ const opp=winningCells(3-side);if(opp.length>=2)return -MATE+ply+2;
+ if(depth<=0){
+  // Only extend tactical replies when a direct winning move must be parried.
+  if(!opp.length||ext>=2||ply>=16)return quickEval(side);
+  depth=1;ext++;
+ }
+ const key=hash1+':'+hash2+':'+side,entry=tt.get(key),a0=alpha,b0=beta;
+ if(entry&&entry.depth>=depth){if(entry.flag===0)return entry.score;
+  if(entry.flag===1)alpha=Math.max(alpha,entry.score);
+  if(entry.flag===2)beta=Math.min(beta,entry.score);
+  if(alpha>=beta)return entry.score;
+ }
+ const width=depth>=8?7:depth>=6?9:depth>=4?11:depth>=2?13:15;
+ let ordered=moves(side,width,entry?entry.best:-1);
+ if(!ordered.length)return 0;
+ let best=-INF,bestP=ordered[0].p;
+ for(let j=0;j<ordered.length;j++){
+  const m=ordered[j],p=m.p;make(p,side);let val;
+  if(hasWon(p,side))val=MATE-ply-1;
+  else {
+   let reduction=j>=8&&depth>=5&&m.at<20000&&m.df<20000?1:0;
+   if(j===0)val=-search(3-side,depth-1-reduction,-beta,-alpha,p,ply+1,ext);
+   else {
+    val=-search(3-side,depth-1-reduction,-alpha-1,-alpha,p,ply+1,ext);
+    if(!stopFlag&&val>alpha&&val<beta)val=-search(3-side,depth-1,-beta,-alpha,p,ply+1,ext);
+   }
+  }
+  undo(p,side);if(stopFlag)return 0;
+  if(val>best){best=val;bestP=p;}if(val>alpha)alpha=val;
+  if(alpha>=beta){history[p]=Math.min(10000000,history[p]+depth*depth*17);break;}
+ }
+ if(tt.size>=85000)tt.clear();
+ tt.set(key,{best:bestP,depth,score:best,flag:best<=a0?2:best>=b0?1:0});
+ return best;
+}
+// Proven VCF: every attack leaves an immediate winning cell, forcing a single block.
+// Failing/unfinished proof searches never count as proven wins.
+function proveVCF(attacker,remaining){
+ if(++proofNodes>12000||Date.now()>proofDeadline)return false;
+ if(winningCells(3-attacker).length)return false;
+ if(winningCells(attacker).length)return true;
+ if(remaining<=0)return false;
+ const ordered=moves(attacker,13).filter(x=>x.af||x.at>=1700000).slice(0,13);
+ for(const m of ordered){
+  make(m.p,attacker);const enem=winningCells(3-attacker),ours=winningCells(attacker);
+  let ok=false;
+  if(!enem.length){if(ours.length>=2)ok=true;
+   else if(ours.length===1){const block=ours[0];make(block,3-attacker);
+    ok=proveVCF(attacker,remaining-1);undo(block,3-attacker);
+   }
+  }
+  undo(m.p,attacker);
+  if(ok)return true;
+ }
+ return false;
+}
+function findVCF(side,ordered){
+ for(const move of ordered.slice(0,15)){
+  if(Date.now()>=proofDeadline||proofNodes>=12000)break;
+  make(move.p,side);let adversary=winningCells(3-side),mine=winningCells(side),ok=false;
+  if(!adversary.length){if(mine.length>=2)ok=true;
+   else if(mine.length===1){const p=mine[0];make(p,3-side);
+    ok=proveVCF(side,10);undo(p,3-side);
+   }
+  }
+  undo(move.p,side);
+  if(ok)return move.p;
+ }
+ return -1;
+}
+// Threat map: for each empty intersection, test whether giving it to white
+// creates an unstoppable pair of distinct winning cells. Root candidates that
+// allow a white fork are deprioritized unless black has an immediate counter-win.
+// Threat variables are always computed from the current board; the stamp invalidates
+// all affected (up to 4 steps in each direction) point-score cache entries.
+// Unlike v8.0, the fork detector enumerates EVERY locally reachable empty cell.
+function enemyForkThreats(opp,cap=12){
+ const out=[],reply=3-opp;
+ for(const p of candidates()){
+  if(Date.now()>deadline-250)break;
+  make(p,opp);
+  const theirWins=winningCells(opp),ourWins=winningCells(reply);
+  undo(p,opp);
+  if(!ourWins.length&&theirWins.length>=2){out.push(p);if(out.length>=cap)break;}
+ }
+ return out;
+}
+// One-turn threat map: calculate the *actual* number of separate winning cells
+// created by a stone, not a score-derived count of similar pattern windows.
+// A four+four is only a forced fork if our side has no immediate counter-win.
+function nextThreats(side,cap=20){
+ const result=[];let count=0;
+ for(const p of candidates()){
+  if(Date.now()>deadline-280||count++>90)break;
+  const a=point(p,side);
+  // Open-three candidates are examined as well; tactical moves are not cut
+  // merely because their heuristic score is below the v8 threshold.
+  if(a.score<3500&&a.three===0)continue;
+  make(p,side);
+  const own=winningCells(side),enemy=winningCells(3-side);
+  const category=enemy.length?0:own.length>=2?3:own.length===1?2:(a.three>=2?1:0);
+  undo(p,side);
+  if(category)result.push({p,category,score:a.score});
+ }
+ result.sort((a,b)=>b.category-a.category||b.score-a.score);
+ return result.slice(0,cap);
+}
+// Linked reinforcement graph. A node is an empty point which improves an
+// independently existing three/four direction. Each 5-cell segment is checked
+// for *other* reinforcement nodes that would also create a NEW connecting line.
+// The graph describes latent (NOT proven) tactics; only actual forced replies
+// and legal winning points receive mate-level scores.
+function linkedReinforcements(side,softDeadline){
+ const eligible=[];
+ for(const p of candidates()){
+  if(Date.now()>=softDeadline)break;
+  const v=point(p,side);
+  if(v.four>0||v.three>0||v.activeAxes>=2)
+   eligible.push({p,v,rank:v.four*500000+v.three*150000+v.activeAxes*40000});
+ }
+ // A small number of real reinforcing intersections, not hundreds of
+ // speculative empty sites, determine whether a tactical network exists.
+ eligible.sort((a,b)=>b.rank-a.rank||a.p-b.p);
+ const nodesMap=new Map(eligible.slice(0,26).map(x=>[x.p,x.v]));
+ let links=0,triples=0,crossings=0,threatLineScore=0;
+ const seenGroups=new Set();
+ for(let s=0;s<segments.length;s++){
+  if((s&63)===0&&Date.now()>=softDeadline)break;
+  const seg=segments[s],dir=segmentDirs[s];let stones=0,bridges=0,strongBridges=0,blocked=false;
+  for(const p of seg){
+   if(b[p]===3-side){blocked=true;break;}
+   if(b[p]===side){stones++;continue;}
+   const v=nodesMap.get(p);if(!v)continue;
+   // This cell's OTHER direction is improved by playing here; these points
+   // can later connect to make a line that is not presently on the board.
+   let otherAxes=0;for(let k=0;k<4;k++)if(k!==dir&&v.axis[k]>=2)otherAxes++;
+   if(otherAxes){bridges++;if(v.forcingAxes)strongBridges++;}
+  }
+  if(blocked||bridges<2||stones+bridges<3)continue;
+  // Merge overlapping five-windows which represent the SAME enhancing group.
+  const nodeKey=seg.filter(p=>nodesMap.has(p)&&b[p]===0&&
+   nodesMap.get(p).axis.some((v,k)=>k!==dir&&v>=2)).join(',');
+  const key=dir+':'+nodeKey;if(seenGroups.has(key))continue;seenGroups.add(key);
+  if(bridges>=3)triples++;
+  links++;if(strongBridges>=2)crossings++;
+  threatLineScore+=strongBridges>=2?(bridges>=3?750000:370000):
+                   bridges>=3?135000:45000;
+ }
+ return {links,triples,crossings,score:Math.min(6500000,threatLineScore)};
+}
+// Bounded counterfactual: compare reinforcing networks *after* the candidate.
+// Does not assert that disconnected future moves are forced or already placed.
+function assessNetwork(side,p,softDeadline){
+ if(Date.now()>=softDeadline)return {bonus:0,risk:0};
+ make(p,side);
+ const own=linkedReinforcements(side,softDeadline);
+ const enemy=linkedReinforcements(3-side,softDeadline);
+ undo(p,side);
+ const bonus=own.score+Math.min(2200000,own.crossings*360000+own.triples*70000);
+ const risk=enemy.score+Math.min(5500000,enemy.crossings*900000+enemy.triples*140000);
+ return {bonus,risk,own,enemy};
+}
+// Exact one-reply safety screening is used to keep a bad static score from
+// suppressing urgent replies. All forced continuation claims are rechecked.
+function rootSafety(side,move){
+ make(move.p,side);
+ const me=winningCells(side),opp=winningCells(3-side);
+ let penalty=0;
+ if(me.length>=2&&!opp.length){undo(move.p,side);return -MATE/2;}
+ if(opp.length>=2)penalty=MATE/2;
+ else if(opp.length===1&&!me.length)penalty=80000000;
+ else if(!me.length){
+  const threats=nextThreats(3-side,24);
+  for(const threat of threats){
+   let d=threat.category===3?85000000:threat.category===2?8500000:750000;
+   if(threat.category>=2){
+    make(threat.p,3-side);
+    const blocks=winningCells(3-side),myWin=winningCells(side);
+    // Even a single four can be terminal if the required answer leads to
+    // the next unanswerable fork.  Check exact blocking responses.
+    if(blocks.length===1&&!myWin.length){
+     const block=blocks[0];make(block,side);
+     const follow=nextThreats(3-side,3);
+     if(follow.some(q=>q.category>=3))d+=22000000;
+     if(follow.some(q=>q.category===2&&point(q.p,3-side).activeAxes>=2))d+=8500000;
+     undo(block,side);
+    }
+    undo(threat.p,3-side);
+   }
+   penalty=Math.max(penalty,d);
+   if(penalty>=85000000)break;
+  }
+ }
+ undo(move.p,side);return penalty;
+}
+function ans(p,depth,begin,score,tag){return {row:(p/15)|0,col:p%15,debug:{algorithm:'v8.1'+(tag?'/'+tag:''),depth,nodes:nodes+proofNodes,timeMs:Date.now()-begin,score:Math.round(score)}};}
+function chooseMove(ctx){
+ const raw=new Uint8Array(SZ);for(let r=0;r<15;r++)for(let c=0;c<15;c++)raw[r*15+c]=Number(ctx.board?.[r]?.[c])||0;
+ const side=ctx.color===2?2:1,begin=Date.now();
+ // Controller passes a protected per-move time allowance; maximum 59.2 s.
+ let time=Math.max(120,Math.min(59200,Number(ctx.timeLimitMs)||14200));deadline=begin+time;proofDeadline=begin+Math.min(time>16000?5000:2300,Math.floor(time*.17));rootPly=ctx.ply||0;
+ initialize(raw);
+ const immediate=winningCells(side);if(immediate.length)return ans(immediate[0],0,begin,MATE,'win');
+ const danger=winningCells(3-side);if(danger.length){
+  let best=danger[0],bestValue=-INF;for(const p of danger){let v=point(p,side).score;if(v>bestValue){bestValue=v;best=p;}}
+  return ans(best,0,begin,-MATE,'block');
+ }
+ let occupied=0;for(const v of b)if(v)occupied++;
+ if(!occupied)return ans(112,0,begin,0,'opening');
+ let ordered=moves(side,24);if(!ordered.length)return ans(112,0,begin,0,'none');
+ // Opening: preserve strong central development in the absence of forced tactics.
+ let best=ordered[0].p,depthDone=0,score=0;
+ let threat=enemyForkThreats(3-side,10),threatSet=new Set(threat);
+ if(threat.length){for(let m of ordered)if(threatSet.has(m.p))m.priority+=4000000;ordered.sort((a,b)=>b.priority-a.priority);best=ordered[0].p;}
+ const proved=findVCF(side,ordered);
+ if(proved>=0)return ans(proved,11,begin,MATE-3,'vcf');
+ // Defense evaluation on a bounded initial root set; no unbounded root penalties.
+ let analyzed=[];
+ for(const m of ordered.slice(0,20)){
+  if(Date.now()>=Math.min(deadline-650,begin+Math.min(3300,time*.26)))break;
+  m.danger=rootSafety(side,m);
+  analyzed.push(m);
+ }
+ if(!analyzed.length)return ans(best,0,begin,score,'time');
+ ordered=analyzed;
+ ordered.sort((x,y)=>(x.danger||0)-(y.danger||0)||y.priority-x.priority);
+ best=ordered[0].p;
+ // A bounded separate pass evaluates the second type of compound threat:
+ // reinforcement sites from DIFFERENT original lines linking into a new five-line.
+ const graphDeadline=Math.min(deadline-1100,begin+Math.min(time*.52,time-1100));
+ for(const m of ordered.slice(0,Math.min(13,ordered.length))){
+  if(Date.now()>=graphDeadline)break;
+  m.network=assessNetwork(side,m.p,graphDeadline);
+  m.priority+=(m.network.bonus-m.network.risk*.88);
+  m.danger=(m.danger||0)+Math.min(5200000,m.network.risk*.74);
+ }
+ ordered.sort((x,y)=>(x.danger||0)-(y.danger||0)||y.priority-x.priority);
+ const minDanger=ordered[0].danger||0;
+ // Do not prune all but the first few apparently safe moves: the scoring
+ // model may be wrong about latent attacks. Preserve the top safe 12 and
+ // every credible forcing attack (up to 20 candidates in total).
+ const keeps=ordered.filter(m=>(m.danger||0)<=minDanger+1800000).slice(0,12);
+ const forced=ordered.filter(m=>m.af||m.at>=1800000||m.multi>=2||m.defMulti>=2).slice(0,12);
+ const safe=new Set([...keeps,...forced,...ordered.slice(0,7)].map(m=>m.p));
+ // Iterative deepening: only completed full iterations may replace the move.
+ for(let dep=1;dep<=14;dep++){
+  if(Date.now()>=deadline-180)break;
+  let line=moves(side,dep>=8?11:dep>=5?15:19,best).filter(m=>safe.has(m.p));
+  if(!line.length)line=ordered.slice(0,Math.min(4,ordered.length));
+  line.sort((x,y)=>(y.p===best?350000000:0)+y.priority-((x.p===best?350000000:0)+x.priority));
+  let top=-INF,chosen=line[0].p,alpha=-INF;
+  for(const m of line){
+   make(m.p,side);
+   let val=hasWon(m.p,side)?MATE-1:-search(3-side,dep-1,-INF,-alpha,m.p,1,0);
+   undo(m.p,side);
+   if(stopFlag)break;
+   // Network evaluation is a bounded heuristic tie-break, never a proof.
+   // Any tactical forced loss on the principal variation dominates it.
+   const net=ordered.find(x=>x.p===m.p)?.network;
+   const adjusted=Math.abs(val)>MATE*.75?val:val+(net?Math.max(-2500000,Math.min(2500000,(net.bonus-net.risk)*.27)):0);
+   if(adjusted>top){top=adjusted;chosen=m.p;}alpha=Math.max(alpha,val);
+  }
+  if(stopFlag)break;
+  best=chosen;score=top;depthDone=dep;
+  if(score>=MATE-1000)break;
+ }
+ return ans(best,depthDone,begin,score,depthDone?'search':'safety');
+}
+const LINES={
+ start:['黑方先行。现在由我落下第一子。','这一局，我执黑。棋局开始。','天元起手，接下来轮到你。'],
+ thinking:['我在逐点核查攻防与下一轮威胁。','这一步，先验算是否存在必应之手。','我再深入推演几层棋路。'],
+ sleeping:['白棋该你了。','我会等你落子。'],
+ move:['这一子，落定。','轮到你了。','棋势正在发生变化。'],
+ afterOpponentMove:['这一手我记下了。','你的选择，我会继续演算。'],
+ block:['先切断这条线。','这个防点不能让给你。'],
+ threat:['这一步是攻势的起点。','看看你怎么应对。'],
+ win:['五子连珠，黑方获胜。','胜负已定，这一局是我赢了。'],
+ lose:['这局是你赢了。再来一盘。','黑棋这一手确实算漏了。'],
+ draw:['平局。棋盘已满。']
+};
+window.__gomokuV81Diagnostics={prepare(board){initialize(board);},point,linkedReinforcements,assessNetwork,
+  play(p,side){make(p,side);},takeBack(p,side){undo(p,side);},winningCells};
+window.ChessAI={name:'v8.1',version:'8.1',level:'v8.1',forceBlack:true,lines:LINES,emojis:null,chooseMove};
+})();
+
+</script><script id="sampleAIV8Source" type="text/plain">
 /* Jiang Qiyan Gomoku v8.0 — offline black-first threat engine.
  * Freestyle 15x15, no forbidden moves. All computations are local.
  */
@@ -2207,7 +2616,7 @@ const LINES={
 window.ChessAI={name:'v8.0',version:'8.0',level:'v8.0',forceBlack:true,lines:LINES,emojis:null,chooseMove};
 })();
 </script>
-<script type="text/plain" id="sampleAIV7Source">
+<script id="sampleAIV7Source" type="text/plain">
 
 /* Jiang Qiyan · Gomoku v7.0 Tactical-Proof Engine
  * 15×15 freestyle Gomoku. Pure JavaScript, browser Worker compatible.
@@ -2546,6 +2955,7 @@ window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,c
 
 </script>
 <script>
+
 (function () {
   'use strict';
   var N=15, MAX=225, EMPTY=0, BLACK=1, WHITE=2;
@@ -2866,7 +3276,7 @@ window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,c
     var curr=lastMove<0?'尚未落子':posName(lastMove)+' · '+CN[board[lastMove]];
     infoEl.innerHTML='<div class="info-title">落子信息 <span class="coord">15 × 15</span></div>'+
       '<div class="row"><span>规则</span><b>自由五子棋（无禁手）</b></div>'+
-      '<div class="row"><span>首手</span><b>黑棋先行</b></div>'+
+      '<div class="row"><span>首手</span><b>黑棋先行 · 不旋转棋盘</b></div>'+
       '<div class="row"><span>上一手</span><b>'+escapeHtml(curr)+'</b></div>'+
       '<div class="row total"><span>已落子</span><b>'+(counts[BLACK]+counts[WHITE])+' / 225</b></div>';
   }
@@ -2876,14 +3286,38 @@ window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,c
     diffTag.textContent='黑 '+n[BLACK]+' : '+n[WHITE]+' 白';
     diffTag.className='diff-tag even';
   }
+  function suppressThreatHints(){
+    if(!loadedAI)return false;
+    // Only versioned built-in engines v7 and up are in this policy.
+    var v=String(loadedAI.version||'');
+    return /^([7-9]|[1-9][0-9])(?:\.|$)/.test(v);
+  }
+  var threatPreference={fxShake:true,fxQuake:true,fxFire:true},threatLock=false;
+  function syncThreatControls(){
+    var locked=suppressThreatHints();
+    for(var id of ['fxShake','fxQuake','fxFire']){
+      var control=$(id);if(!control)continue;
+      if(locked&&!threatLock)threatPreference[id]=control.checked;
+      if(locked){control.checked=false;control.disabled=true;
+        control.title='此 AI 版本禁用威胁提示';}
+      else {control.disabled=false;control.title='';
+        if(threatLock)control.checked=threatPreference[id];}
+    }
+    threatLock=locked;
+    fxEnabled.shake=locked?false:$('fxShake').checked;
+    fxEnabled.quake=locked?false:$('fxQuake').checked;
+    fxEnabled.fire=locked?false:$('fxFire').checked;
+    if(locked){fireLayer.className='fire-layer';boardEl.classList.remove('quake');
+      boardEl.querySelectorAll('.urgent').forEach(function(el){el.classList.remove('urgent');});}
+  }
   function updateFireEffect(){
-    if(!fxEnabled.fire||gameOver){fireLayer.className='fire-layer';return;}
+    if(suppressThreatHints()||!fxEnabled.fire||gameOver){fireLayer.className='fire-layer';return;}
     var b=winningPlaces(board,BLACK),w=winningPlaces(board,WHITE);
     if(b.length){fireLayer.className='fire-layer active bottom';}
     else if(w.length){fireLayer.className='fire-layer active top';}
     else fireLayer.className='fire-layer';
   }
-  function playQuake(){if(!fxEnabled.quake)return;boardEl.classList.remove('quake');void boardEl.offsetWidth;boardEl.classList.add('quake');setTimeout(function(){boardEl.classList.remove('quake');},760);}
+  function playQuake(){if(suppressThreatHints()||!fxEnabled.quake)return;boardEl.classList.remove('quake');void boardEl.offsetWidth;boardEl.classList.add('quake');setTimeout(function(){boardEl.classList.remove('quake');},760);}
   function explodeAt(p){
     if(!fxEnabled.explode)return;
     var elem=boardEl.children[p+1];if(!elem)return;
@@ -2938,12 +3372,12 @@ window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,c
     else {
       var nextWins=winningPlaces(board,mover),oppWins=winningPlaces(board,turn);
       if(meta.actor==='ai'){
-        if(nextWins.length)text=aiSay('threat',{ply:gameLog.moves.length,at:posName(p)});
-        else if(meta.blocked)text=aiSay('block',{ply:gameLog.moves.length});
+        if(!suppressThreatHints()&&nextWins.length)text=aiSay('threat',{ply:gameLog.moves.length,at:posName(p)});
+        else if(!suppressThreatHints()&&meta.blocked)text=aiSay('block',{ply:gameLog.moves.length});
         else if(Math.random()<.34)text=aiSay('move',{ply:gameLog.moves.length});
-        if(nextWins.length>=2&&fxEnabled.quake)playQuake();
+        if(!suppressThreatHints()&&nextWins.length>=2&&fxEnabled.quake)playQuake();
       }else if(Math.random()<.27)text=aiSay('afterOpponentMove',{ply:gameLog.moves.length});
-      if(!text&&fxEnabled.shake&&oppWins.length){
+      if(!suppressThreatHints()&&!text&&fxEnabled.shake&&oppWins.length){
         // 只让刚刚落下的关键棋子闪烁，不涉及将军或王。
         setTimeout(function(){var el=boardEl.children[p+1];if(el)el.classList.add('urgent');},0);
       }
@@ -2973,9 +3407,17 @@ window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,c
     if(activeWorker){activeWorker.terminate();activeWorker=null;}
     if(activeAIUrl){URL.revokeObjectURL(activeAIUrl);activeAIUrl=null;}
   }
+  function getThinkLimits(ctx){
+    var version=String((loadedAI&&loadedAI.version)||'');
+    var upgraded=/^([9]|[1-9][0-9])(?:\.|$)/.test(version)||/^8\.(?:[1-9][0-9]*)(?:$|\D)/.test(version);
+    var occupied=ctx.ply||0;
+    var total=upgraded?(occupied>=30?60000:occupied>=10?30000:15000):15000;
+    return {hardMs:total-200,engineMs:total-800,totalMs:total};
+  }
   function askWorker(ctx){
     return new Promise(function(resolve,reject){
       if(typeof Worker==='undefined'){reject(new Error('不支持 Web Worker'));return;}
+      var limits=getThinkLimits(ctx);
       var source='var window=self;\n'+loadedSource+'\n'+
         'self.onmessage=async function(e){try{var t=Date.now();var result=await self.ChessAI.chooseMove(e.data);self.postMessage({ok:true,decision:result,elapsed:Date.now()-t});}catch(ex){self.postMessage({ok:false,error:String(ex&&ex.message||ex)});}};';
       try {
@@ -2984,10 +3426,10 @@ window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,c
         activeWorker=new Worker(activeAIUrl);
         var w=activeWorker,done=false;
         function finish(err,res){if(done)return;done=true;clearTimeout(timeout);if(activeWorker===w)killWorker();if(err)reject(err);else resolve(res);}
-        var timeout=setTimeout(function(){finish(new Error('搜索超时'));},loadedAI.forceBlack?14800:15000);
+        var timeout=setTimeout(function(){finish(new Error('搜索超时'));},limits.hardMs);
         w.onmessage=function(e){var data=e.data;if(!data.ok)finish(new Error(data.error));else finish(null,data);};
         w.onerror=function(e){finish(new Error('AI 工作线程异常：'+(e.message||'unknown')));};
-        w.postMessage({board:ctx.board,color:ctx.color,ply:ctx.ply,level:loadedAI.level??100,moves:ctx.moves,timeLimitMs:14200});
+        w.postMessage({board:ctx.board,color:ctx.color,ply:ctx.ply,level:loadedAI.level??100,moves:ctx.moves,timeLimitMs:limits.engineMs});
       }catch(e){killWorker();reject(e);}
     });
   }
@@ -3044,7 +3486,7 @@ window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,c
     loadedAI=data.ai;
     if(loadedAI.forceBlack){selectedSide=WHITE;syncSidePolicy();}loadedSource=data.code;emojiCache={};currentEmojiEvent=null;
     var name=loadedAI.name||'未命名 AI',ver=loadedAI.version||'?';
-    setAIStatus('✔ 已加载：'+name,'ok');
+    setAIStatus('✔ 已加载：'+name,'ok');syncThreatControls();
     aiInfoEl.innerHTML='当前 AI：<b>'+escapeHtml(name)+'</b>';
     aiNameplate.textContent=name;startBtn.disabled=false;setAIEmoji('default');preloadAllEmojis();
   }
@@ -3056,7 +3498,7 @@ window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,c
     reader.onerror=function(){onAIError(new Error('文件读取失败'));};reader.readAsText(file);
   }
   function getBuiltInAISource(kind){
-    var src=kind==='v8'?$('sampleAIV8Source').textContent:kind==='v7'?$('sampleAIV7Source').textContent:kind==='v6'?$('sampleAI100Source').textContent:$('sampleAISource').textContent;
+    var src=kind==='v81'?$('sampleAIV81Source').textContent:kind==='v8'?$('sampleAIV8Source').textContent:kind==='v7'?$('sampleAIV7Source').textContent:kind==='v6'?$('sampleAI100Source').textContent:$('sampleAISource').textContent;
     if(kind==='v5')src+='\n'+$('sampleAI75Patch').textContent;
     return src;
   }
@@ -3069,7 +3511,7 @@ window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,c
     css.setProperty('--bubble-font',FONT_MAP[$('optFont').value]||FONT_MAP.cute);
     boardEl.dataset.stoneStyle=$('optStoneStyle').value;
     fxEnabled.shake=$('fxShake').checked;fxEnabled.explode=$('fxExplode').checked;
-    fxEnabled.quake=$('fxQuake').checked;fxEnabled.fire=$('fxFire').checked;
+    fxEnabled.quake=$('fxQuake').checked;fxEnabled.fire=$('fxFire').checked;syncThreatControls();
   }
   function startGame(){
     if(!loadedAI)return;gameToken++;killWorker();applyAdvancedSettings();
@@ -3097,7 +3539,7 @@ window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,c
     document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1500);
   }
   sideChoice.addEventListener('click',function(e){var btn=e.target.closest('[data-color]');if(!btn)return;
-    if(builtinAiSelect.value==='v8'||(loadedAI&&loadedAI.forceBlack))return;
+    if((builtinAiSelect.value==='v8'||builtinAiSelect.value==='v81')||(loadedAI&&loadedAI.forceBlack))return;
     selectedSide=Number(btn.dataset.color);
     Array.prototype.forEach.call(sideChoice.children,function(x){x.classList.toggle('active',x===btn);});
   });
@@ -3107,7 +3549,7 @@ window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,c
   ['dragleave','drop'].forEach(function(event){dropZone.addEventListener(event,function(e){e.preventDefault();dropZone.classList.remove('dragover');});});
   dropZone.addEventListener('drop',function(e){var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)handleAIFile(f);});
   function syncSidePolicy(){
-    var fixed=builtinAiSelect.value==='v8';
+    var fixed=(builtinAiSelect.value==='v8'||builtinAiSelect.value==='v81');
     $('sideChoiceLabel').textContent=fixed?'执棋颜色 · AI 执黑先手':'选择执棋颜色';
     Array.prototype.forEach.call(sideChoice.querySelectorAll('button'),function(btn){
       btn.disabled=fixed;btn.classList.toggle('active',Number(btn.dataset.color)===(fixed?2:selectedSide));
@@ -3116,12 +3558,12 @@ window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,c
   }
   builtinAiSelect.addEventListener('change',function(){
     var kind=builtinAiSelect.value;if(!kind)return;syncSidePolicy();
-    var name=kind.replace('v','v')+'.0';
+    var name=kind==='v81'?'v8.1':kind+'.0';
     setAIStatus('正在加载：'+name);
     loadAISource(getBuiltInAISource(kind),name).then(onAILoaded).catch(onAIError);
   });
   downloadSampleBtn.addEventListener('click',function(){
-    var kind=builtinAiSelect.value||'v8';var blob=new Blob([getBuiltInAISource(kind)],{type:'text/javascript;charset=utf-8'});
+    var kind=builtinAiSelect.value||'v81';var blob=new Blob([getBuiltInAISource(kind)],{type:'text/javascript;charset=utf-8'});
     var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;
     a.download='jiang-qiyan-gomoku-'+kind+'.js';document.body.appendChild(a);a.click();a.remove();
     setTimeout(function(){URL.revokeObjectURL(url);},1500);
@@ -3130,8 +3572,9 @@ window.ChessAI={name:'v7.0',version:'7.0',level:'v7.0',lines:LINES,emojis:null,c
   downloadLogBtn.addEventListener('click',downloadLog);
   createPixelHearts();window.addEventListener('resize',createPixelHearts);setAIEmoji('default');render();
   // 默认预选最高档，打开网页即能开始，无需上传文件。
-  builtinAiSelect.value='v8';syncSidePolicy();loadAISource(getBuiltInAISource('v8'),'v8.0').then(onAILoaded).catch(onAIError);
+  builtinAiSelect.value='v81';syncSidePolicy();loadAISource(getBuiltInAISource('v81'),'v8.1').then(onAILoaded).catch(onAIError);
 })();
+
 
 </script>
 </body>
