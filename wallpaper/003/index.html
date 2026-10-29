@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#120920">
+  <meta name="color-scheme" content="dark">
+  <title>NEON HEART CITY — 4K Cyberpunk OC Wallpaper V2</title>
+  <link rel="stylesheet" href="./css/wallpaper.css">
+</head>
+<body>
+  <main id="wallpaper" aria-label="原创哥特赛博朋克角色动态壁纸">
+    <div id="scene" aria-hidden="true">
+      <div id="city-stage"></div>
+      <div id="actor-stage"></div>
+    </div>
+    <canvas id="particles" aria-hidden="true"></canvas>
+    <div id="vignette" aria-hidden="true"></div>
+    <button id="settings-toggle" class="icon-button" type="button" title="壁纸设置" aria-label="打开壁纸设置" aria-expanded="false" aria-controls="settings-panel">
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M10.3 2.7h3.4l.6 2.1 1.8.8 1.9-1.1 2.5 2.5-1.1 1.9.8 1.8 2.1.6v3.4l-2.1.6-.8 1.8 1.1 1.9-2.5 2.5-1.9-1.1-1.8.8-.6 2.1h-3.4l-.6-2.1-1.8-.8-1.9 1.1-2.5-2.5 1.1-1.9-.8-1.8-2.1-.6v-3.4l2.1-.6.8-1.8-1.1-1.9 2.5-2.5 1.9 1.1 1.8-.8z"/>
+        <circle cx="12" cy="12" r="3.1"/>
+      </svg>
+    </button>
+    <section id="settings-panel" class="settings-panel" role="dialog" aria-modal="false" aria-label="壁纸动态参数" hidden>
+      <header class="settings-header">
+        <div><span class="eyebrow">WALLPAPER ENGINE</span><h2>动态参数</h2></div>
+        <button id="settings-close" class="close-button" aria-label="关闭设置" title="关闭设置">×</button>
+      </header>
+      <div class="setting-list">
+        <label class="setting"><span>发丝播放速度 <output id="windSpeed-value">1.00×</output></span><input data-config="windSpeed" type="range" min="0.25" max="2.25" step="0.05"></label>
+        <label class="setting"><span>粒子密度 <output id="particleDensity-value">86%</output></span><input data-config="particleDensity" type="range" min="0" max="1.8" step="0.05"></label>
+        <label class="setting"><span>鼠标扰动力 <output id="mouseForce-value">1.00×</output></span><input data-config="mouseForce" type="range" min="0" max="2.5" step="0.05"></label>
+        <label class="setting"><span>城市窗光 <output id="lightIntensity-value">1.00×</output></span><input data-config="lightIntensity" type="range" min="0.15" max="2" step="0.05"></label>
+        <label class="setting"><span>背景亮度 <output id="backgroundBrightness-value">100%</output></span><input data-config="backgroundBrightness" type="range" min="0.35" max="1.65" step="0.05"></label>
+        <label class="setting"><span>景深模糊 <output id="backgroundBlur-value">0.0 px</output></span><input data-config="backgroundBlur" type="range" min="0" max="5" step="0.25"></label>
+        <label class="setting"><span>视差强度 <output id="parallaxAmount-value">1.00×</output></span><input data-config="parallaxAmount" type="range" min="0" max="2" step="0.05"></label>
+        <label class="setting"><span>霓虹饱和度 <output id="saturation-value">107%</output></span><input data-config="saturation" type="range" min="0.6" max="1.8" step="0.05"></label>
+        <div class="toggles">
+          <label class="toggle"><input data-config="animationEnabled" type="checkbox"><span>发丝逐帧动画</span></label>
+          <label class="toggle"><input data-config="particlesEnabled" type="checkbox"><span>漂浮爱心与光点</span></label>
+          <label class="toggle"><input data-config="cityLightsEnabled" type="checkbox"><span>建筑窗户闪烁</span></label>
+        </div>
+      </div>
+      <footer class="settings-footer"><button id="reset-settings" type="button">恢复默认</button><span id="status-line" role="status">本地离线运行</span></footer>
+    </section>
+    <div id="boot-status" class="sr-only" role="status" aria-live="polite"></div>
+  </main>
+  <!-- The JS manifest is intentional: fetch('./config.json') often fails under file:// . -->
+  <script src="./config/config.js"></script>
+  <script defer src="./js/player.js"></script>
+</body>
+</html>
