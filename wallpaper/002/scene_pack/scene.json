@@ -1,0 +1,1197 @@
+{
+  "name": "OC NEON · Corrected Four-layer Hair Loop",
+  "version": "4.0.0",
+  "designSize": [
+    1672,
+    941
+  ],
+  "description": "独立逐帧PNG；身体区域完整；双马尾图层仅含发丝；取消眨眼与木偶变形",
+  "layers": [
+    {
+      "id": "background",
+      "directory": "background",
+      "order": 0,
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        1672,
+        941
+      ],
+      "frames": 1,
+      "fps": 1,
+      "mode": "hold",
+      "render": "cover",
+      "filter": {
+        "blur": 0,
+        "brightness": 0.88
+      }
+    },
+    {
+      "id": "hair_left",
+      "directory": "hair_left",
+      "order": 10,
+      "position": [
+        170,
+        145
+      ],
+      "size": [
+        485,
+        796
+      ],
+      "frames": 32,
+      "fps": 8,
+      "mode": "repeat",
+      "phase": 0,
+      "alpha": 1,
+      "render": "sprite",
+      "content": "left ponytail hair only; no skin, face or clothing"
+    },
+    {
+      "id": "hair_right",
+      "directory": "hair_right",
+      "order": 15,
+      "position": [
+        848,
+        15
+      ],
+      "size": [
+        642,
+        833
+      ],
+      "frames": 32,
+      "fps": 8,
+      "mode": "repeat",
+      "phase": 0.12,
+      "alpha": 1,
+      "render": "sprite",
+      "content": "right ponytail hair only; no skin, face or clothing"
+    },
+    {
+      "id": "body",
+      "directory": "body",
+      "order": 20,
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        1672,
+        941
+      ],
+      "frames": 1,
+      "fps": 1,
+      "mode": "hold",
+      "alpha": 1,
+      "render": "sprite",
+      "content": "complete face, eyes, bow, neck, shoulders, both sleeves and outfit; ponytail tips separated"
+    }
+  ],
+  "particles": {
+    "countDesktop": 115,
+    "countMobile": 55,
+    "radius": 180,
+    "repelForce": 48,
+    "palette": [
+      "#ff77df",
+      "#eeb7ff",
+      "#8bc7ff"
+    ]
+  },
+  "windowLights": {
+    "points": [
+      {
+        "x": 1379,
+        "y": 651,
+        "phase": 0.099,
+        "speed": 1.54,
+        "strength": 0.321,
+        "size": 1.364
+      },
+      {
+        "x": 670,
+        "y": 629,
+        "phase": 5.781,
+        "speed": 1.261,
+        "strength": 0.217,
+        "size": 1.269
+      },
+      {
+        "x": 1621,
+        "y": 404,
+        "phase": 1.853,
+        "speed": 0.924,
+        "strength": 0.213,
+        "size": 1.333
+      },
+      {
+        "x": 1536,
+        "y": 844,
+        "phase": 5.403,
+        "speed": 1.316,
+        "strength": 0.189,
+        "size": 0.956
+      },
+      {
+        "x": 1443,
+        "y": 551,
+        "phase": 2.899,
+        "speed": 1.328,
+        "strength": 0.134,
+        "size": 1.46
+      },
+      {
+        "x": 1325,
+        "y": 784,
+        "phase": 2.223,
+        "speed": 1.112,
+        "strength": 0.2,
+        "size": 1.577
+      },
+      {
+        "x": 1623,
+        "y": 437,
+        "phase": 5.621,
+        "speed": 1.091,
+        "strength": 0.194,
+        "size": 1.453
+      },
+      {
+        "x": 1618,
+        "y": 458,
+        "phase": 6.252,
+        "speed": 0.734,
+        "strength": 0.326,
+        "size": 1.266
+      },
+      {
+        "x": 1334,
+        "y": 745,
+        "phase": 2.788,
+        "speed": 1.383,
+        "strength": 0.202,
+        "size": 1.371
+      },
+      {
+        "x": 1141,
+        "y": 778,
+        "phase": 0.931,
+        "speed": 0.971,
+        "strength": 0.3,
+        "size": 1.192
+      },
+      {
+        "x": 1396,
+        "y": 537,
+        "phase": 0.086,
+        "speed": 1.092,
+        "strength": 0.308,
+        "size": 1.564
+      },
+      {
+        "x": 1137,
+        "y": 684,
+        "phase": 1.345,
+        "speed": 1.389,
+        "strength": 0.212,
+        "size": 1.478
+      },
+      {
+        "x": 1605,
+        "y": 735,
+        "phase": 2.086,
+        "speed": 1.148,
+        "strength": 0.181,
+        "size": 0.91
+      },
+      {
+        "x": 1388,
+        "y": 838,
+        "phase": 1.452,
+        "speed": 1.335,
+        "strength": 0.32,
+        "size": 1.485
+      },
+      {
+        "x": 749,
+        "y": 694,
+        "phase": 0.516,
+        "speed": 0.611,
+        "strength": 0.295,
+        "size": 0.927
+      },
+      {
+        "x": 1386,
+        "y": 775,
+        "phase": 5.243,
+        "speed": 1.469,
+        "strength": 0.172,
+        "size": 1.165
+      },
+      {
+        "x": 1369,
+        "y": 679,
+        "phase": 1.086,
+        "speed": 0.848,
+        "strength": 0.235,
+        "size": 1.13
+      },
+      {
+        "x": 1306,
+        "y": 563,
+        "phase": 3.928,
+        "speed": 1.494,
+        "strength": 0.165,
+        "size": 0.992
+      },
+      {
+        "x": 1326,
+        "y": 550,
+        "phase": 0.528,
+        "speed": 0.568,
+        "strength": 0.161,
+        "size": 0.984
+      },
+      {
+        "x": 645,
+        "y": 626,
+        "phase": 1.545,
+        "speed": 0.852,
+        "strength": 0.227,
+        "size": 1.334
+      },
+      {
+        "x": 614,
+        "y": 710,
+        "phase": 0.825,
+        "speed": 1.495,
+        "strength": 0.246,
+        "size": 1.571
+      },
+      {
+        "x": 603,
+        "y": 566,
+        "phase": 2.386,
+        "speed": 0.643,
+        "strength": 0.203,
+        "size": 1.392
+      },
+      {
+        "x": 589,
+        "y": 709,
+        "phase": 4.266,
+        "speed": 0.508,
+        "strength": 0.168,
+        "size": 1.102
+      },
+      {
+        "x": 1472,
+        "y": 809,
+        "phase": 3.343,
+        "speed": 1.394,
+        "strength": 0.29,
+        "size": 0.84
+      },
+      {
+        "x": 520,
+        "y": 652,
+        "phase": 1.376,
+        "speed": 1.023,
+        "strength": 0.324,
+        "size": 0.869
+      },
+      {
+        "x": 482,
+        "y": 606,
+        "phase": 3.662,
+        "speed": 1.129,
+        "strength": 0.277,
+        "size": 1.539
+      },
+      {
+        "x": 954,
+        "y": 706,
+        "phase": 2.082,
+        "speed": 0.696,
+        "strength": 0.342,
+        "size": 1.391
+      },
+      {
+        "x": 442,
+        "y": 609,
+        "phase": 0.84,
+        "speed": 1.019,
+        "strength": 0.278,
+        "size": 0.973
+      },
+      {
+        "x": 295,
+        "y": 635,
+        "phase": 3.362,
+        "speed": 0.502,
+        "strength": 0.171,
+        "size": 1.137
+      },
+      {
+        "x": 518,
+        "y": 688,
+        "phase": 0.411,
+        "speed": 1.544,
+        "strength": 0.318,
+        "size": 1.106
+      },
+      {
+        "x": 1623,
+        "y": 534,
+        "phase": 0.615,
+        "speed": 0.988,
+        "strength": 0.212,
+        "size": 1.045
+      },
+      {
+        "x": 1156,
+        "y": 800,
+        "phase": 6.119,
+        "speed": 1.007,
+        "strength": 0.1,
+        "size": 1.143
+      },
+      {
+        "x": 1114,
+        "y": 794,
+        "phase": 4.942,
+        "speed": 0.679,
+        "strength": 0.255,
+        "size": 1.357
+      },
+      {
+        "x": 670,
+        "y": 650,
+        "phase": 0.476,
+        "speed": 1.007,
+        "strength": 0.155,
+        "size": 1.415
+      },
+      {
+        "x": 1163,
+        "y": 684,
+        "phase": 3.483,
+        "speed": 0.794,
+        "strength": 0.316,
+        "size": 1.0
+      },
+      {
+        "x": 1149,
+        "y": 742,
+        "phase": 5.33,
+        "speed": 1.49,
+        "strength": 0.297,
+        "size": 0.851
+      },
+      {
+        "x": 1089,
+        "y": 799,
+        "phase": 3.117,
+        "speed": 0.794,
+        "strength": 0.328,
+        "size": 1.093
+      },
+      {
+        "x": 596,
+        "y": 547,
+        "phase": 0.139,
+        "speed": 0.911,
+        "strength": 0.185,
+        "size": 0.866
+      },
+      {
+        "x": 1607,
+        "y": 439,
+        "phase": 3.788,
+        "speed": 0.823,
+        "strength": 0.273,
+        "size": 0.801
+      },
+      {
+        "x": 1601,
+        "y": 775,
+        "phase": 5.176,
+        "speed": 0.94,
+        "strength": 0.343,
+        "size": 0.999
+      },
+      {
+        "x": 1407,
+        "y": 410,
+        "phase": 0.423,
+        "speed": 0.964,
+        "strength": 0.174,
+        "size": 1.148
+      },
+      {
+        "x": 1365,
+        "y": 463,
+        "phase": 1.855,
+        "speed": 1.35,
+        "strength": 0.193,
+        "size": 1.568
+      },
+      {
+        "x": 978,
+        "y": 751,
+        "phase": 2.812,
+        "speed": 1.234,
+        "strength": 0.288,
+        "size": 1.123
+      },
+      {
+        "x": 1449,
+        "y": 571,
+        "phase": 3.517,
+        "speed": 0.498,
+        "strength": 0.337,
+        "size": 1.093
+      },
+      {
+        "x": 1335,
+        "y": 820,
+        "phase": 3.724,
+        "speed": 1.281,
+        "strength": 0.109,
+        "size": 0.955
+      },
+      {
+        "x": 519,
+        "y": 716,
+        "phase": 4.698,
+        "speed": 1.103,
+        "strength": 0.216,
+        "size": 1.524
+      },
+      {
+        "x": 1626,
+        "y": 510,
+        "phase": 3.632,
+        "speed": 0.522,
+        "strength": 0.133,
+        "size": 0.911
+      },
+      {
+        "x": 1417,
+        "y": 536,
+        "phase": 1.591,
+        "speed": 0.707,
+        "strength": 0.288,
+        "size": 1.511
+      },
+      {
+        "x": 966,
+        "y": 730,
+        "phase": 0.676,
+        "speed": 0.75,
+        "strength": 0.269,
+        "size": 1.392
+      },
+      {
+        "x": 877,
+        "y": 691,
+        "phase": 3.324,
+        "speed": 0.818,
+        "strength": 0.118,
+        "size": 1.41
+      },
+      {
+        "x": 312,
+        "y": 612,
+        "phase": 4.434,
+        "speed": 0.475,
+        "strength": 0.163,
+        "size": 1.159
+      },
+      {
+        "x": 298,
+        "y": 587,
+        "phase": 4.713,
+        "speed": 0.846,
+        "strength": 0.354,
+        "size": 0.847
+      },
+      {
+        "x": 1420,
+        "y": 591,
+        "phase": 5.681,
+        "speed": 1.146,
+        "strength": 0.186,
+        "size": 1.472
+      },
+      {
+        "x": 1419,
+        "y": 571,
+        "phase": 1.381,
+        "speed": 1.511,
+        "strength": 0.341,
+        "size": 1.438
+      },
+      {
+        "x": 1132,
+        "y": 795,
+        "phase": 3.07,
+        "speed": 1.051,
+        "strength": 0.113,
+        "size": 1.056
+      },
+      {
+        "x": 1607,
+        "y": 371,
+        "phase": 3.323,
+        "speed": 1.42,
+        "strength": 0.218,
+        "size": 1.087
+      },
+      {
+        "x": 1575,
+        "y": 731,
+        "phase": 2.361,
+        "speed": 0.862,
+        "strength": 0.223,
+        "size": 1.553
+      },
+      {
+        "x": 1543,
+        "y": 820,
+        "phase": 2.863,
+        "speed": 1.465,
+        "strength": 0.232,
+        "size": 1.133
+      },
+      {
+        "x": 1527,
+        "y": 633,
+        "phase": 0.899,
+        "speed": 0.733,
+        "strength": 0.156,
+        "size": 1.027
+      },
+      {
+        "x": 1428,
+        "y": 753,
+        "phase": 1.938,
+        "speed": 1.219,
+        "strength": 0.275,
+        "size": 1.022
+      },
+      {
+        "x": 1416,
+        "y": 391,
+        "phase": 4.931,
+        "speed": 0.539,
+        "strength": 0.251,
+        "size": 1.555
+      },
+      {
+        "x": 717,
+        "y": 690,
+        "phase": 4.792,
+        "speed": 0.749,
+        "strength": 0.1,
+        "size": 1.219
+      },
+      {
+        "x": 595,
+        "y": 598,
+        "phase": 3.108,
+        "speed": 1.017,
+        "strength": 0.173,
+        "size": 1.436
+      },
+      {
+        "x": 1457,
+        "y": 605,
+        "phase": 0.317,
+        "speed": 1.389,
+        "strength": 0.168,
+        "size": 1.027
+      },
+      {
+        "x": 1331,
+        "y": 591,
+        "phase": 3.395,
+        "speed": 1.091,
+        "strength": 0.334,
+        "size": 1.5
+      },
+      {
+        "x": 1100,
+        "y": 768,
+        "phase": 2.097,
+        "speed": 1.089,
+        "strength": 0.216,
+        "size": 1.235
+      },
+      {
+        "x": 1089,
+        "y": 734,
+        "phase": 3.874,
+        "speed": 1.283,
+        "strength": 0.306,
+        "size": 0.99
+      },
+      {
+        "x": 1387,
+        "y": 795,
+        "phase": 0.759,
+        "speed": 0.807,
+        "strength": 0.256,
+        "size": 0.804
+      },
+      {
+        "x": 1125,
+        "y": 739,
+        "phase": 1.022,
+        "speed": 1.425,
+        "strength": 0.274,
+        "size": 1.447
+      },
+      {
+        "x": 1327,
+        "y": 840,
+        "phase": 2.796,
+        "speed": 1.068,
+        "strength": 0.204,
+        "size": 0.967
+      },
+      {
+        "x": 750,
+        "y": 743,
+        "phase": 4.373,
+        "speed": 0.825,
+        "strength": 0.126,
+        "size": 1.169
+      },
+      {
+        "x": 612,
+        "y": 776,
+        "phase": 4.301,
+        "speed": 0.481,
+        "strength": 0.305,
+        "size": 1.469
+      },
+      {
+        "x": 1389,
+        "y": 392,
+        "phase": 1.229,
+        "speed": 1.49,
+        "strength": 0.163,
+        "size": 1.421
+      },
+      {
+        "x": 1141,
+        "y": 876,
+        "phase": 3.68,
+        "speed": 0.845,
+        "strength": 0.22,
+        "size": 1.576
+      },
+      {
+        "x": 1166,
+        "y": 610,
+        "phase": 3.818,
+        "speed": 0.977,
+        "strength": 0.195,
+        "size": 1.047
+      },
+      {
+        "x": 1141,
+        "y": 818,
+        "phase": 5.696,
+        "speed": 0.888,
+        "strength": 0.281,
+        "size": 0.803
+      },
+      {
+        "x": 450,
+        "y": 570,
+        "phase": 3.58,
+        "speed": 1.278,
+        "strength": 0.311,
+        "size": 1.421
+      },
+      {
+        "x": 1611,
+        "y": 625,
+        "phase": 0.725,
+        "speed": 0.703,
+        "strength": 0.104,
+        "size": 1.091
+      },
+      {
+        "x": 1603,
+        "y": 535,
+        "phase": 4.971,
+        "speed": 0.747,
+        "strength": 0.112,
+        "size": 1.291
+      },
+      {
+        "x": 395,
+        "y": 627,
+        "phase": 6.101,
+        "speed": 1.25,
+        "strength": 0.207,
+        "size": 0.979
+      },
+      {
+        "x": 303,
+        "y": 652,
+        "phase": 1.193,
+        "speed": 0.94,
+        "strength": 0.252,
+        "size": 1.365
+      },
+      {
+        "x": 1521,
+        "y": 808,
+        "phase": 0.276,
+        "speed": 0.748,
+        "strength": 0.299,
+        "size": 1.392
+      },
+      {
+        "x": 1131,
+        "y": 627,
+        "phase": 6.155,
+        "speed": 1.47,
+        "strength": 0.292,
+        "size": 0.918
+      },
+      {
+        "x": 776,
+        "y": 706,
+        "phase": 2.531,
+        "speed": 0.98,
+        "strength": 0.357,
+        "size": 1.169
+      },
+      {
+        "x": 1391,
+        "y": 873,
+        "phase": 2.407,
+        "speed": 1.197,
+        "strength": 0.143,
+        "size": 1.046
+      },
+      {
+        "x": 617,
+        "y": 830,
+        "phase": 5.633,
+        "speed": 0.542,
+        "strength": 0.296,
+        "size": 1.28
+      },
+      {
+        "x": 297,
+        "y": 605,
+        "phase": 4.384,
+        "speed": 1.474,
+        "strength": 0.238,
+        "size": 1.533
+      },
+      {
+        "x": 1398,
+        "y": 584,
+        "phase": 5.045,
+        "speed": 0.517,
+        "strength": 0.306,
+        "size": 1.391
+      },
+      {
+        "x": 1115,
+        "y": 682,
+        "phase": 0.69,
+        "speed": 1.435,
+        "strength": 0.296,
+        "size": 1.528
+      },
+      {
+        "x": 1375,
+        "y": 752,
+        "phase": 4.072,
+        "speed": 1.133,
+        "strength": 0.274,
+        "size": 1.403
+      },
+      {
+        "x": 1062,
+        "y": 622,
+        "phase": 2.921,
+        "speed": 0.774,
+        "strength": 0.343,
+        "size": 1.214
+      },
+      {
+        "x": 550,
+        "y": 679,
+        "phase": 4.011,
+        "speed": 1.245,
+        "strength": 0.315,
+        "size": 1.214
+      },
+      {
+        "x": 227,
+        "y": 544,
+        "phase": 3.445,
+        "speed": 0.609,
+        "strength": 0.251,
+        "size": 1.17
+      },
+      {
+        "x": 1620,
+        "y": 379,
+        "phase": 1.678,
+        "speed": 1.231,
+        "strength": 0.322,
+        "size": 1.393
+      },
+      {
+        "x": 1401,
+        "y": 512,
+        "phase": 0.546,
+        "speed": 1.187,
+        "strength": 0.228,
+        "size": 1.01
+      },
+      {
+        "x": 1013,
+        "y": 745,
+        "phase": 5.926,
+        "speed": 0.635,
+        "strength": 0.34,
+        "size": 0.948
+      },
+      {
+        "x": 867,
+        "y": 659,
+        "phase": 2.207,
+        "speed": 1.294,
+        "strength": 0.19,
+        "size": 1.116
+      },
+      {
+        "x": 748,
+        "y": 796,
+        "phase": 0.774,
+        "speed": 1.289,
+        "strength": 0.202,
+        "size": 0.945
+      },
+      {
+        "x": 1094,
+        "y": 816,
+        "phase": 2.029,
+        "speed": 0.87,
+        "strength": 0.238,
+        "size": 1.366
+      },
+      {
+        "x": 670,
+        "y": 684,
+        "phase": 3.324,
+        "speed": 0.746,
+        "strength": 0.195,
+        "size": 0.95
+      },
+      {
+        "x": 1180,
+        "y": 633,
+        "phase": 2.316,
+        "speed": 0.593,
+        "strength": 0.329,
+        "size": 1.462
+      },
+      {
+        "x": 1117,
+        "y": 877,
+        "phase": 4.465,
+        "speed": 1.318,
+        "strength": 0.225,
+        "size": 1.165
+      },
+      {
+        "x": 968,
+        "y": 775,
+        "phase": 3.578,
+        "speed": 0.87,
+        "strength": 0.33,
+        "size": 1.396
+      },
+      {
+        "x": 570,
+        "y": 704,
+        "phase": 4.575,
+        "speed": 1.358,
+        "strength": 0.251,
+        "size": 0.916
+      },
+      {
+        "x": 495,
+        "y": 766,
+        "phase": 1.323,
+        "speed": 0.777,
+        "strength": 0.324,
+        "size": 0.947
+      },
+      {
+        "x": 305,
+        "y": 691,
+        "phase": 4.851,
+        "speed": 0.692,
+        "strength": 0.167,
+        "size": 1.364
+      },
+      {
+        "x": 1612,
+        "y": 818,
+        "phase": 4.845,
+        "speed": 1.012,
+        "strength": 0.281,
+        "size": 1.383
+      },
+      {
+        "x": 566,
+        "y": 724,
+        "phase": 3.816,
+        "speed": 0.848,
+        "strength": 0.155,
+        "size": 1.348
+      },
+      {
+        "x": 1596,
+        "y": 656,
+        "phase": 5.689,
+        "speed": 0.591,
+        "strength": 0.248,
+        "size": 1.46
+      },
+      {
+        "x": 1431,
+        "y": 418,
+        "phase": 0.135,
+        "speed": 1.203,
+        "strength": 0.212,
+        "size": 1.093
+      },
+      {
+        "x": 1235,
+        "y": 494,
+        "phase": 2.988,
+        "speed": 0.533,
+        "strength": 0.354,
+        "size": 1.503
+      },
+      {
+        "x": 1036,
+        "y": 859,
+        "phase": 5.624,
+        "speed": 0.701,
+        "strength": 0.347,
+        "size": 1.097
+      },
+      {
+        "x": 1298,
+        "y": 607,
+        "phase": 5.887,
+        "speed": 0.875,
+        "strength": 0.31,
+        "size": 1.366
+      },
+      {
+        "x": 1117,
+        "y": 716,
+        "phase": 2.064,
+        "speed": 0.599,
+        "strength": 0.117,
+        "size": 0.909
+      },
+      {
+        "x": 1091,
+        "y": 879,
+        "phase": 3.707,
+        "speed": 0.951,
+        "strength": 0.347,
+        "size": 0.89
+      },
+      {
+        "x": 807,
+        "y": 810,
+        "phase": 5.916,
+        "speed": 1.096,
+        "strength": 0.116,
+        "size": 1.598
+      },
+      {
+        "x": 776,
+        "y": 743,
+        "phase": 2.998,
+        "speed": 0.753,
+        "strength": 0.105,
+        "size": 1.258
+      },
+      {
+        "x": 763,
+        "y": 763,
+        "phase": 0.527,
+        "speed": 1.38,
+        "strength": 0.118,
+        "size": 1.218
+      },
+      {
+        "x": 571,
+        "y": 824,
+        "phase": 5.849,
+        "speed": 0.881,
+        "strength": 0.304,
+        "size": 1.165
+      },
+      {
+        "x": 466,
+        "y": 610,
+        "phase": 2.713,
+        "speed": 1.351,
+        "strength": 0.342,
+        "size": 0.916
+      },
+      {
+        "x": 90,
+        "y": 597,
+        "phase": 0.151,
+        "speed": 1.226,
+        "strength": 0.149,
+        "size": 1.262
+      },
+      {
+        "x": 1564,
+        "y": 773,
+        "phase": 5.344,
+        "speed": 0.691,
+        "strength": 0.101,
+        "size": 1.456
+      },
+      {
+        "x": 1468,
+        "y": 509,
+        "phase": 4.263,
+        "speed": 0.779,
+        "strength": 0.202,
+        "size": 0.979
+      },
+      {
+        "x": 1249,
+        "y": 489,
+        "phase": 2.726,
+        "speed": 0.862,
+        "strength": 0.282,
+        "size": 1.455
+      },
+      {
+        "x": 1151,
+        "y": 371,
+        "phase": 1.69,
+        "speed": 0.989,
+        "strength": 0.101,
+        "size": 1.437
+      },
+      {
+        "x": 594,
+        "y": 622,
+        "phase": 2.489,
+        "speed": 0.757,
+        "strength": 0.111,
+        "size": 1.473
+      },
+      {
+        "x": 501,
+        "y": 646,
+        "phase": 2.777,
+        "speed": 1.499,
+        "strength": 0.152,
+        "size": 1.295
+      },
+      {
+        "x": 231,
+        "y": 692,
+        "phase": 2.048,
+        "speed": 1.003,
+        "strength": 0.181,
+        "size": 1.161
+      },
+      {
+        "x": 1436,
+        "y": 789,
+        "phase": 0.042,
+        "speed": 1.009,
+        "strength": 0.328,
+        "size": 1.123
+      },
+      {
+        "x": 1436,
+        "y": 512,
+        "phase": 2.858,
+        "speed": 0.796,
+        "strength": 0.106,
+        "size": 1.416
+      },
+      {
+        "x": 1363,
+        "y": 868,
+        "phase": 1.522,
+        "speed": 1.441,
+        "strength": 0.282,
+        "size": 1.503
+      },
+      {
+        "x": 1363,
+        "y": 494,
+        "phase": 4.014,
+        "speed": 1.087,
+        "strength": 0.341,
+        "size": 1.263
+      },
+      {
+        "x": 1328,
+        "y": 867,
+        "phase": 1.687,
+        "speed": 0.598,
+        "strength": 0.187,
+        "size": 1.398
+      },
+      {
+        "x": 572,
+        "y": 774,
+        "phase": 4.229,
+        "speed": 0.518,
+        "strength": 0.315,
+        "size": 0.896
+      },
+      {
+        "x": 1279,
+        "y": 545,
+        "phase": 5.549,
+        "speed": 0.461,
+        "strength": 0.116,
+        "size": 1.543
+      }
+    ]
+  },
+  "controls": {
+    "hideHud": "H",
+    "debugLayers": "D",
+    "layerKeys": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "reset": "0"
+  }
+}
